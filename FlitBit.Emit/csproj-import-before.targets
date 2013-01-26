@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Imported before the projects's csproj file.
+	
+  Establishes the project's solution-root, and imports the targets file therein.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<RunVersioning>true</RunVersioning>
+		<SolutionDirOffset></SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDirOffset Condition="!Exists('$(MSBuildProjectDirectory)\$(SolutionDirOffset)SolutionRoot.targets')">..\..\..\..\..\..\..\..\..\..\..\</SolutionDirOffset>
+		<SolutionDir>$(MSBuildProjectDirectory)\$(SolutionDirOffset)</SolutionDir>
+	</PropertyGroup>
+
+	<Import Condition="Exists('$(SolutionDir)SolutionRoot.targets')" Project="$(SolutionDir)SolutionRoot.targets"/>
+</Project>

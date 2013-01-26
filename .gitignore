@@ -1,0 +1,8 @@
+bin/
+obj/
+packages/
+TestResults/
+*.suo
+*.user
+*.version.cs
+*.log

@@ -1,0 +1,20 @@
+<!--
+  Establishes the nearest version root, and if found imports the targets file therein.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">	
+	<PropertyGroup>
+		<NsVersionRoot>$(MSBuildProjectDirectory)\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\..\..\..\..\</NsVersionRoot>
+		<NsVersionRoot Condition="!Exists('$(NsVersionRoot)VersionRoot.targets')">$(MSBuildProjectDirectory)\..\..\..\..\..\..\..\..\..\..\..\</NsVersionRoot>
+	</PropertyGroup>
+	
+	<Import Condition="Exists('$(NsVersionRoot)VersionRoot.targets')" Project="$(NsVersionRoot)VersionRoot.targets"/>	
+</Project>
