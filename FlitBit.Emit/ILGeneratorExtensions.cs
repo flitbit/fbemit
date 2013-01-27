@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Reflection.Emit;
+using FlitBit.Core;
 
 namespace FlitBit.Emit
 {

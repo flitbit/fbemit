@@ -122,7 +122,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FlitBit.Emit.nuspec" />
+    <None Include="FlitBit.Emit.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)\csproj-import-after.targets" Condition="Exists('$(MSBuildThisFileDirectory)\csproj-import-after.targets')" />

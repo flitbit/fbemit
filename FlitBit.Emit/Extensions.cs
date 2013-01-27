@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 
 using System.Runtime.CompilerServices;
+using FlitBit.Core;
 
 namespace FlitBit.Emit
 {
@@ -47,75 +48,7 @@ namespace FlitBit.Emit
 			}
 			return result;
 		}
-
-		/// <summary>
-		/// Gets a readable full name. Since this method uses reflection it should be used
-		/// rarely. It was created to supply simpler type names when constructing error messages.
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <returns>A readable name such as My.Namespace.MyType&lt;string, int></returns>
-		public static string GetReadableFullName(this Type type)
-		{
-			Contract.Requires<ArgumentNullException>(type != null);
-
-			string result;
-			Type tt = (type.IsArray) ? type.GetElementType() : type;
-			string simpleName = tt.Name;
-
-			Contract.Assume(simpleName != null);
-			Contract.Assert(simpleName.Length >= 0);
-
-			if (simpleName.Contains('`'))
-			{
-				simpleName = simpleName.Substring(0, simpleName.IndexOf("`", StringComparison.InvariantCulture));
-				var args = tt.GetGenericArguments();
-				for (int i = 0; i < args.Length; i++)
-				{
-					if (i == 0)
-						simpleName = String.Concat(simpleName, '<', args[i].GetReadableSimpleName());
-					else
-						simpleName = String.Concat(simpleName, ',', args[i].GetReadableSimpleName());
-				}
-				simpleName = String.Concat(simpleName, '>');
-			}
-			if (tt.IsNested)
-			{
-				result = String.Concat(tt.DeclaringType.GetReadableFullName(), "+", simpleName);
-			}
-			else
-			{
-				result = String.Concat(tt.Namespace, ".", simpleName);
-			}
-			return result;
-		}
-
-		/// <summary>
-		/// Gets a readable simple name for a type.
-		/// </summary>
-		/// <param name="type">the type</param>
-		/// <returns>A readable name such as MyType&lt;string, int></returns>
-		public static string GetReadableSimpleName(this Type type)
-		{
-			Contract.Requires<ArgumentNullException>(type != null);
-
-			Type tt = (type.IsArray) ? type.GetElementType() : type;
-			string simpleName = tt.Name;
-			if (simpleName.Contains('`'))
-			{
-				simpleName = simpleName.Substring(0, simpleName.IndexOf("`", StringComparison.InvariantCulture));
-				var args = tt.GetGenericArguments();
-				for (int i = 0; i < args.Length; i++)
-				{
-					if (i == 0)
-						simpleName = String.Concat(simpleName, '<', args[i].GetReadableSimpleName());
-					else
-						simpleName = String.Concat(simpleName, ',', args[i].GetReadableSimpleName());
-				}
-				simpleName = String.Concat(simpleName, '>');
-			}
-			return simpleName;
-		}
-
+		
 		/// <summary>
 		/// Determines if a type is a number.
 		/// </summary>

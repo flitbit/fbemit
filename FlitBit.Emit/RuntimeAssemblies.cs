@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Threading;
+using FlitBit.Core;
 
 namespace FlitBit.Emit
 {
