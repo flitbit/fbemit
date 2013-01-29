@@ -120,7 +120,7 @@ namespace FlitBit.Emit
 		static RuntimeAssemblies()
 		{
 			AppDomain.CurrentDomain.TypeResolve += new ResolveEventHandler(CurrentDomain_TypeResolve);
-			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_TypeResolve);
+			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
 		}
 
 		/// <summary>
@@ -198,8 +198,24 @@ namespace FlitBit.Emit
 			return asmName;
 		}
 
+		static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			if (__dynamicAssembly.IsValueCreated)
+			{
+				var asm = __dynamicAssembly.Value;
+				var reqName = new AssemblyName(args.Name);
+				if (reqName.Name.StartsWith(RuntimeAssembliesConfigSection.Current.DynamicAssemblyPrefix)
+					&& reqName.Version == asm.Name.Version)
+				{
+					return asm.Builder;
+				}
+			}
+			return null;
+		}
+
 		static Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
 		{
+			// todo: reconstitue generated classes (stereotypical implementations) not already present in the dynamic assembly...
 			return null;
 		}    
 	}

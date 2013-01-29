@@ -26,6 +26,13 @@ namespace FlitBit.Emit
 		/// </summary>
 		public static readonly TypeAttributes StaticTypeAttributes = TypeAttributes.Sealed | TypeAttributes.Abstract;
 
+		class CustomAttributeDescriptor
+		{
+			public Type Attribute { get; set; }
+			public ConstructorInfo Ctor { get; set; }
+			public object[] Args { get; set; }
+		}
+		readonly IList<CustomAttributeDescriptor> _customAttr = new List<CustomAttributeDescriptor>();
 		readonly Dictionary<string, EmittedField> _fields = new Dictionary<string, EmittedField>();
 		readonly Dictionary<string, EmittedGenericArgument> _genericArguments = new Dictionary<string, EmittedGenericArgument>();
 		readonly List<TypeRef> _implementedInterfaces = new List<TypeRef>();
@@ -474,6 +481,10 @@ namespace FlitBit.Emit
 		protected internal override void OnCompile()
 		{
 			var builder = this.Builder;
+			foreach (var a in _customAttr)
+			{
+				builder.SetCustomAttribute(new CustomAttributeBuilder(a.Ctor, a.Args));
+			}
 			foreach (var m in _fields.Values)
 			{
 				m.Compile();
@@ -669,5 +680,48 @@ namespace FlitBit.Emit
 			Contract.Invariant(this.Name != null);
 			Contract.Invariant(this.Name.Length > 0);
 		}
+
+		/// <summary>
+		/// Sets a custom attribute for the emitted class.
+		/// </summary>
+		/// <param name="constructor">the attribute's constructor</param>
+		/// <param name="constructorArgs">arguments for the constructor</param>
+		/// <typeparam name="T">attribute type T</typeparam>
+		public void SetCustomAttribute<T>(ConstructorInfo constructor, object[] constructorArgs) 
+			where T: Attribute
+		{
+			Contract.Requires<ArgumentNullException>(constructor != null);
+			var descr = new CustomAttributeDescriptor
+			{
+				Attribute = typeof(T),
+				Ctor = constructor,
+				Args = constructorArgs ?? new object[0]
+			};
+			_customAttr.Add(descr);
+		}
+
+		/// <summary>
+		/// Sets a custom attribute for the emitted class; for constructors that don't take arguments.
+		/// </summary>
+		/// <param name="constructor">the attribute's constructor</param>
+		/// <typeparam name="T">attribute type T</typeparam>
+		public void SetCustomAttribute<T>(ConstructorInfo constructor)
+			where T : Attribute
+		{
+			Contract.Requires<ArgumentNullException>(constructor != null);
+			
+			this.SetCustomAttribute<T>(constructor, new object[0]);
+		}
+
+		/// <summary>
+		/// Sets a custom attribute for the emitted class; uses the attribute's default constructor.
+		/// </summary>
+		/// <typeparam name="T">attribute type T</typeparam>
+		public void SetCustomAttribute<T>() 
+			where T: Attribute
+		{
+			var ctor = typeof(T).GetConstructor(Type.EmptyTypes);
+			this.SetCustomAttribute<T>(ctor, new object[0]);
+		}		
 	}
 }
