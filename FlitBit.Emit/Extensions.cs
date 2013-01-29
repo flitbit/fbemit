@@ -17,38 +17,7 @@ namespace FlitBit.Emit
 	/// Extension methods for System.Type.
 	/// </summary>
 	public static class Extensions
-	{
-		/// <summary>
-		/// Determines if the arrays are equal or if the items in two different arrays
-		/// are equal.
-		/// </summary>
-		/// <typeparam name="T">Item type T</typeparam>
-		/// <param name="lhs">Left-hand comparand</param>
-		/// <param name="rhs">Right-hand comparand</param>
-		/// <returns><b>true</b> if the arrays are equal or if the items in the arrays are equal.</returns>
-		public static bool EqualsOrItemsEqual<T>(this T[] lhs, T[] rhs)
-		{
-			bool result = Object.Equals(lhs, rhs);
-			if (result == false && lhs != null && rhs != null
-				&& lhs.LongLength == rhs.LongLength)
-			{
-				if (lhs.Length == 0)
-				{ // two empty arrays are equal.
-					result = true;
-				}
-				else
-				{
-					IEqualityComparer<T> comparer = EqualityComparer<T>.Default;
-					for (int i = 0; i < lhs.LongLength; i++)
-					{
-						result = comparer.Equals(lhs[i], rhs[i]);
-						if (!result) break;
-					}
-				}
-			}
-			return result;
-		}
-		
+	{		
 		/// <summary>
 		/// Determines if a type is a number.
 		/// </summary>
