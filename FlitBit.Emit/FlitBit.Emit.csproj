@@ -89,9 +89,9 @@
     <CodeContractsEmitXMLDocs>True</CodeContractsEmitXMLDocs>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlitBit.Core, Version=2.4.6.22580, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FlitBit.Core, Version=2.4.8.37912, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FlitBit.Core.2.4.6.22580\lib\net40\FlitBit.Core.dll</HintPath>
+      <HintPath>..\packages\FlitBit.Core.2.4.8.37912\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -141,6 +141,7 @@
     <Compile Include="RawPropertyRef.cs" />
     <Compile Include="RuntimeAssemblies.cs" />
     <Compile Include="RuntimeAssembliesConfigSection.cs" />
+    <Compile Include="Meta\AutoImplementedAttribute.cs" />
     <Compile Include="TypeRef.cs" />
   </ItemGroup>
   <ItemGroup>

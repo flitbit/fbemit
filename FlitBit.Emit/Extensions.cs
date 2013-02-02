@@ -75,6 +75,8 @@ namespace FlitBit.Emit
 		public static IEnumerable<Type> GetTypeHierarchyInDeclarationOrder(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+
 
 			if (type.BaseType == null) return type.GetInterfaces().Reverse().Concat(Enumerable.Repeat(type, 1));
 
@@ -91,6 +93,8 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetReadWriteProperties(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+
 			return from p in type.GetProperties()
 						 where p.CanRead && p.CanWrite
 						 select p;
@@ -104,6 +108,8 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetReadableProperties(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+
 			return from p in type.GetProperties()
 						 where p.CanRead
 						 select p;
@@ -118,6 +124,8 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetReadableProperties(this Type type, BindingFlags binding)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+
 			return from p in type.GetProperties(binding)
 						 where p.CanRead
 						 select p;
@@ -147,6 +155,7 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetReadablePropertiesFromHierarchy(this Type type, BindingFlags binding)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			List<PropertyInfo> results = new List<PropertyInfo>();
 			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
@@ -155,7 +164,31 @@ namespace FlitBit.Emit
 												 where p.CanRead && p.GetGetMethod() != null
 												 select p);
 			}
-			return results.ToList();
+			return results;
+		}
+
+		/// <summary>
+		/// Using reflection, gets readable properties from a type's hierarchy that declare a custom attribute.
+		/// </summary>
+		/// <typeparam name="TAttr">custom attribute type TAttr</typeparam>
+		/// <param name="type">the type</param>
+		/// <param name="binding">binding flags</param>
+		/// <returns>writable properties</returns>
+		public static IEnumerable<PropertyInfo> GetReadablePropertiesFromHierarchyWithCustomAttribute<TAttr>(this Type type, BindingFlags binding)
+			where TAttr: Attribute
+		{
+			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+
+			List<PropertyInfo> results = new List<PropertyInfo>();
+			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
+			{
+				results.AddRange(from p in t.GetProperties(binding)
+												 where p.CanRead && p.GetGetMethod() != null
+													&& p.IsDefined(typeof(TAttr), true)
+												 select p);
+			}
+			return results;
 		}
 
 		/// <summary>
@@ -226,6 +259,7 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetWritableProperties(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties()
 						 where p.CanWrite && p.GetSetMethod() != null
@@ -241,6 +275,7 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetWritableProperties(this Type type, BindingFlags binding)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties(binding)
 						 where p.CanWrite && p.GetSetMethod() != null
@@ -256,7 +291,7 @@ namespace FlitBit.Emit
 		public static IEnumerable<PropertyInfo> GetWritablePropertiesFromHierarchy(this Type type, BindingFlags binding)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
-
+			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			List<PropertyInfo> results = new List<PropertyInfo>();
 			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
@@ -438,6 +473,7 @@ namespace FlitBit.Emit
 		public static string FormatEmittedTypeName(this Type type, string suffix)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<string>() != null);
 
 			return String.Concat(type.Namespace
 				, ".emitted"
@@ -454,6 +490,7 @@ namespace FlitBit.Emit
 		public static string MangleTypeName(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<string>() != null);
 
 			string result;
 			var tt = (type.IsArray) ? type.GetElementType() : type;
@@ -489,6 +526,7 @@ namespace FlitBit.Emit
 		public static string MangleTypeNameWithoutNamespace(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Ensures(Contract.Result<string>() != null);
 
 			var tt = (type.IsArray) ? type.GetElementType() : type;
 			var simpleName = tt.Name;

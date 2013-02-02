@@ -493,7 +493,7 @@ namespace FlitBit.Emit
 			{
 				// May be multiple methods, overloaded
 				foreach (var m in mm)
-				{					
+				{
 					m.Compile();
 				}
 			}
@@ -687,8 +687,8 @@ namespace FlitBit.Emit
 		/// <param name="constructor">the attribute's constructor</param>
 		/// <param name="constructorArgs">arguments for the constructor</param>
 		/// <typeparam name="T">attribute type T</typeparam>
-		public void SetCustomAttribute<T>(ConstructorInfo constructor, object[] constructorArgs) 
-			where T: Attribute
+		public void SetCustomAttribute<T>(ConstructorInfo constructor, object[] constructorArgs)
+			where T : Attribute
 		{
 			Contract.Requires<ArgumentNullException>(constructor != null);
 			var descr = new CustomAttributeDescriptor
@@ -709,7 +709,7 @@ namespace FlitBit.Emit
 			where T : Attribute
 		{
 			Contract.Requires<ArgumentNullException>(constructor != null);
-			
+
 			this.SetCustomAttribute<T>(constructor, new object[0]);
 		}
 
@@ -717,11 +717,11 @@ namespace FlitBit.Emit
 		/// Sets a custom attribute for the emitted class; uses the attribute's default constructor.
 		/// </summary>
 		/// <typeparam name="T">attribute type T</typeparam>
-		public void SetCustomAttribute<T>() 
-			where T: Attribute
+		public void SetCustomAttribute<T>()
+			where T : Attribute
 		{
 			var ctor = typeof(T).GetConstructor(Type.EmptyTypes);
 			this.SetCustomAttribute<T>(ctor, new object[0]);
-		}		
+		}
 	}
 }
