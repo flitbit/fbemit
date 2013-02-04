@@ -39,8 +39,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FlitBit.Core.2.4.9.20309\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FlitBit.Wireup">
-      <HintPath>..\..\packages\FlitBit.Wireup.2.4.0.35609\lib\net40\FlitBit.Wireup.dll</HintPath>
+    <Reference Include="FlitBit.Wireup, Version=2.5.0.25837, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FlitBit.Wireup.2.5.0.25837\lib\net40\FlitBit.Wireup.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">

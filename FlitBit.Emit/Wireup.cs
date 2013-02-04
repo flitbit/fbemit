@@ -2,7 +2,7 @@
 using FlitBit.Wireup;
 using FlitBit.Wireup.Meta;
 
-[assembly: Wireup(WireupBehaviors.DeclarationsOnly, typeof(FlitBit.Emit.WireupThisAssembly))]
+[assembly: Wireup(typeof(FlitBit.Emit.WireupThisAssembly))]
 
 namespace FlitBit.Emit
 {

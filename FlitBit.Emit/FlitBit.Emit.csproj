@@ -93,9 +93,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FlitBit.Core.2.4.9.20309\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FlitBit.Wireup, Version=2.4.2.22367, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FlitBit.Wireup, Version=2.5.0.25837, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FlitBit.Wireup.2.4.2.22367\lib\net40\FlitBit.Wireup.dll</HintPath>
+      <HintPath>..\packages\FlitBit.Wireup.2.5.0.25837\lib\net40\FlitBit.Wireup.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
