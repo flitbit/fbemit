@@ -35,9 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlitBit.Core, Version=2.4.9.20309, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FlitBit.Core, Version=2.4.9.46943, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FlitBit.Core.2.4.9.20309\lib\net40\FlitBit.Core.dll</HintPath>
+      <HintPath>..\..\packages\FlitBit.Core.2.4.9.46943\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
     <Reference Include="FlitBit.Wireup, Version=2.5.0.25837, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
