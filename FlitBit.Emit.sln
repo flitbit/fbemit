@@ -14,8 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlitBit.Emit.Tests", "FlitB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C27F9AC6-569B-4AE2-81C1-51805D68588B}"
 	ProjectSection(SolutionItems) = preProject
+		build.version = build.version
 		FlitBit.Emit.vsmdi = FlitBit.Emit.vsmdi
 		Local.testsettings = Local.testsettings
+		major.version = major.version
+		minor.version = minor.version
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject

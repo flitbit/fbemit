@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file establishes the major, minor and build version numbers for an assembly.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <VersionMajor>2</VersionMajor>
+    <VersionMinor>6</VersionMinor>
+    <VersionBuild>1</VersionBuild>
+  </PropertyGroup>
+</Project>

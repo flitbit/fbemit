@@ -14,14 +14,14 @@ namespace FlitBit.Emit
 		struct TypeRecord
 		{
 			public Type TargetType;
-			public Delegate Factory;
+			public Delegate Functor;
 
 			internal object CreateInstance()
 			{
-				return (TargetType == null) ? Factory.DynamicInvoke(null) : Activator.CreateInstance(TargetType);
+				return (TargetType == null) ? Functor.DynamicInvoke(null) : Activator.CreateInstance(TargetType);
 			}
 		}
-		ConcurrentDictionary<object, TypeRecord> _emittedTypes = new ConcurrentDictionary<object, TypeRecord>();
+		ConcurrentDictionary<object, TypeRecord> _types = new ConcurrentDictionary<object, TypeRecord>();
 
 		/// <summary>
 		/// Creates a new instance of type T.
@@ -30,40 +30,76 @@ namespace FlitBit.Emit
 		/// <returns></returns>
 		public T CreateInstance<T>()
 		{
-			if (typeof(T).IsAbstract && typeof(T).IsDefined(typeof(AutoImplementedAttribute), true))
-			{
-				return CreateAutoImplemented<T>();
-			}
-			return (T)Activator.CreateInstance<T>();
-		}
-
-		private T CreateAutoImplemented<T>()
-		{
-			var type = typeof(T);
-			var typeLock = type.GetLockForType();
+			var key = typeof(T).GetKeyForType();
 			TypeRecord rec;
-			if (!_emittedTypes.TryGetValue(typeLock, out rec))
+			if (this.CanConstruct<T>() && _types.TryGetValue(key, out rec))
 			{
-				var emitted = false;
+				return (T)rec.CreateInstance();
+			}
+			throw new InvalidOperationException(String.Concat("No suitable implementation found: ", typeof(T).GetReadableFullName(), "."));
+		}
+		
+		/// <summary>
+		/// Determins if the factory can construct instances of type T.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public bool CanConstruct<T>()
+		{
+			bool res = false;
+			var type = typeof(T);
+			var key = type.GetKeyForType();
+			TypeRecord rec;
+			if (_types.TryGetValue(key, out rec))
+			{
+				return true;
+			}
+			if (!type.IsAbstract)
+			{
+				if (type.GetConstructor(Type.EmptyTypes) != null)
+				{
+					rec = new TypeRecord { TargetType = type };
+					_types.TryAdd(key, rec);
+					return true;
+				}
+			}
+			else
+			{
+				var gotImpl = false;
 				foreach (AutoImplementedAttribute attr in type.GetCustomAttributes(typeof(AutoImplementedAttribute), false))
 				{
-					if (attr.GetImplementation<T>((impl, factory) =>
+					if (attr.GetImplementation<T>(this, (impl, functor) =>
 					{
-						// use the implementation type if provided
-						rec = new TypeRecord { TargetType = impl, Factory = factory };
-						_emittedTypes.TryAdd(typeLock, rec);
-					}))
+						if (impl == null || functor == null)
+						{
+							// use the implementation type if provided
+							rec = new TypeRecord { TargetType = impl, Functor = functor };
+							_types.TryAdd(key, rec);
+							gotImpl = true;
+						}
+					}) && gotImpl)
 					{
-						emitted = true;
-						break;
+						return true;
 					}
 				}
-				if (!emitted)
-				{
-					throw new InvalidOperationException(String.Concat("Unable to access implementation of ", type.GetReadableFullName()));
-				}
 			}
-			return (T)rec.CreateInstance();
+			return res;
+		}
+
+		/// <summary>
+		/// Gets the factory's implementation type for type T.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public Type GetImplementationType<T>()
+		{
+			var key = typeof(T).GetKeyForType();
+			TypeRecord rec;
+			if (this.CanConstruct<T>() && _types.TryGetValue(key, out rec))
+			{
+				return rec.TargetType;
+			}
+			return null;
 		}
 	}
 }
