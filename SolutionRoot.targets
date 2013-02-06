@@ -12,8 +12,8 @@
 	<Import Project="$(MSBuildExtensionsPath)\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks"/>
 	<Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
 
-	<Import Condition="Exists('$(SolutionDir)\EstablishVersionRoot.targets')"
-		Project="$(SolutionDir)\EstablishVersionRoot.targets" />
+	<Import Condition="Exists('$(SolutionDir)\VersionRoot.targets')"
+		Project="$(SolutionDir)\VersionRoot.targets" />
 	
 	<Import Condition="Exists('$(SolutionDir)\sln-import-before.targets')" 
 		Project="$(SolutionDir)\sln-import-before.targets" />

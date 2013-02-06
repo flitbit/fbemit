@@ -3,12 +3,10 @@
   This file provides version stamps used by the build.
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Condition="Exists('$(MSBuildThisFileDirectory)Version.targets')" Project="$(MSBuildThisFileDirectory)Version.targets" />
+	
 	<PropertyGroup>
 		<AssemblyInfo Condition="!Exists('$(AssemblyInfo)')">Properties\AssemblyInfo.cs</AssemblyInfo>
-		<VersionMajor Condition="'$(VersionMajor)' == '' And Exists('$(MSBuildThisFileDirectory)major.version')">$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)major.version))</VersionMajor>
-		<VersionMinor Condition="'$(VersionMinor)' == '' And Exists('$(MSBuildThisFileDirectory)minor.version')">$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)minor.version))</VersionMinor>
-		<VersionBuild Condition="'$(VersionBuild)' == '' And Exists('$(MSBuildThisFileDirectory)build.version')">$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)build.version))</VersionBuild>
-		<VersionRevision Condition="'$(VersionRevision)' == '' And Exists('$(MSBuildThisFileDirectory)revision.version')">$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)revision.version))</VersionRevision>
 		<VersionMajor Condition="'$(VersionMajor)' == ''">0</VersionMajor>
 		<VersionMinor Condition="'$(VersionMinor)' == ''">1</VersionMinor>
 		<VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
@@ -52,23 +50,14 @@
 		</CreateProperty>
 	</Target>
 	
-
-	<Target Name="VersioningPrerequisites" 
-					DependsOnTargets="CalcFinalVersionRevision">
-		<!-- take build # from svn revision
-		<SvnInfo Condition="'$(VersionBuild)' == '0'" RepositoryPath="$(MSBuildThisFileDirectory.Replace('\', '/'))">
-			<Output TaskParameter="Revision" PropertyName="VersionBuild" />
-		</SvnInfo>
-		-->
-		
+	<Target Name="VersioningPrerequisites" DependsOnTargets="CalcFinalVersionRevision">
 		<!-- Creates the AssemblyInfo.*.version.cs file -->
 		<ItemGroup>
 			<Line Include="line0"><Text>using System;</Text></Line>
 			<Line Include="line1"><Text>using System.Reflection;</Text></Line>
 			<Line Include="line2"><Text>[assembly: AssemblyFileVersion("$(VersionMajor).$(VersionMinor).$(VersionBuild).$(FinalVersionRevision)")]</Text></Line>
-			<Line Include="line3"><Text>[assembly: AssemblyVersion("$(VersionMajor).$(VersionMinor).$(VersionBuild).$(FinalVersionRevision)")]</Text></Line>
-			<Line Condition="'$(VersionInformational)' != ''" Include="line4">
-				<Text>[assembly: AssemblyInformationalVersion("$(VersionMajor).$(VersionMinor).$(VersionBuild).$(FinalVersionRevision)-$(VersionInformational)")]</Text>
+			<Line Include="line3"><Text>[assembly: AssemblyVersion("$(VersionMajor).$(VersionMinor).$(VersionBuild).0")]</Text></Line>
+			<Line Include="line4"><Text>[assembly: AssemblyInformationalVersion("$(VersionMajor).$(VersionMinor).$(VersionBuild)")]</Text>
 			</Line>
 		</ItemGroup>
 		
@@ -81,8 +70,7 @@
 		<WriteLinesToFile Condition="'$(MustWriteAssemblyInfoVersionFile)' == 'true'" File="$(AssemblyInfoVersionFile)" Lines="@(Line->'%(Text)')" Overwrite="true" />
 	</Target>
 
-	<Target Name="Versioning" BeforeTargets="BeforeBuild" Condition="'$(RunVersioning)' == 'True'"
-				DependsOnTargets="VersioningPrerequisites">
+	<Target Name="Versioning" BeforeTargets="BeforeBuild" Condition="'$(RunVersioning)' == 'True'" DependsOnTargets="VersioningPrerequisites">
 		<CreateItem Include="$(AssemblyInfoVersionFile)">
 			<Output TaskParameter="Include" ItemName="Compile" />
 		</CreateItem>		
