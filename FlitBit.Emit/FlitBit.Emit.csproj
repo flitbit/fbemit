@@ -89,12 +89,13 @@
     <CodeContractsEmitXMLDocs>True</CodeContractsEmitXMLDocs>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlitBit.Core, Version=2.4.11.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FlitBit.Core, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FlitBit.Core.2.4.11\lib\net40\FlitBit.Core.dll</HintPath>
+      <HintPath>..\packages\FlitBit.Core.2.5.0\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FlitBit.Wireup">
-      <HintPath>..\packages\FlitBit.Wireup.2.5.0\lib\net40\FlitBit.Wireup.dll</HintPath>
+    <Reference Include="FlitBit.Wireup, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FlitBit.Wireup.2.5.1\lib\net40\FlitBit.Wireup.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -112,7 +113,6 @@
     <Compile Include="..\AssemblyInfo.corporate.cs">
       <Link>Properties\AssemblyInfo.corporate.cs</Link>
     </Compile>
-    <Compile Include="AutoImplementedTypeFactory.cs" />
     <Compile Include="ConstantValueRef.T.cs" />
     <Compile Include="EmittedAssembly.cs" />
     <Compile Include="EmittedClass.cs" />
@@ -145,9 +145,7 @@
     <Compile Include="RawPropertyRef.cs" />
     <Compile Include="RuntimeAssemblies.cs" />
     <Compile Include="RuntimeAssembliesConfigSection.cs" />
-    <Compile Include="Meta\AutoImplementedAttribute.cs" />
     <Compile Include="TypeRef.cs" />
-    <Compile Include="Wireup.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
