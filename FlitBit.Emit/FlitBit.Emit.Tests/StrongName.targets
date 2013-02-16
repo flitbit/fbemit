@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Signs the assembly if the key is present under the user's profile.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<StrongNameSigningKeyFile>$(APPDATA)\FlitBit\FlitBitStrongName.pfx</StrongNameSigningKeyFile>
+		<SignAssembly Condition="Exists('$(StrongNameSigningKeyFile)')">true</SignAssembly>
+		<AssemblyOriginatorKeyFile Condition="Exists('$(StrongNameSigningKeyFile)')">$(StrongNameSigningKeyFile)</AssemblyOriginatorKeyFile>
+	</PropertyGroup>	
+</Project>

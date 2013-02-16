@@ -8,6 +8,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
-[assembly: Guid("5719325c-2deb-4b42-8049-f6694fc0039b")]
-
-[assembly: InternalsVisibleTo("FlitBit.Emit.Tests")]
+[assembly: Guid("5719325c-2deb-4b42-8049-f6694fc0039b")]			 

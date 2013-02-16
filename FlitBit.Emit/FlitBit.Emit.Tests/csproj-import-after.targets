@@ -1,0 +1,14 @@
+<!--
+  Imported after the projects's csproj file.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+		Add any project specific 'after' build stuffs...
+	-->
+
+	<!-- 
+		Invoke the solution's wrap-around stuffs if present...
+	-->
+	<Import Condition="Exists('$(SolutionDir)\sln-import-after.targets')"
+		Project="$(SolutionDir)\sln-import-after.targets" />
+</Project>
