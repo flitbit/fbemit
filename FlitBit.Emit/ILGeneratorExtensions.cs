@@ -1701,6 +1701,19 @@ namespace FlitBit.Emit
 		}
 
 		/// <summary>
+		/// Copies a value type object pointed to by an address to the top of the stack.
+		/// </summary>
+		/// <param name="il">an ILGenerator where instructions are emitted</param>
+		/// <param name="type">the type being copied</param>
+		public static void LoadValueType(this ILGenerator il, Type type)
+		{
+			Contract.Requires<ArgumentNullException>(il != null);
+			Contract.Requires<ArgumentNullException>(type != null && type.IsValueType);			
+
+			il.Emit(OpCodes.Ldobj, type);
+		}
+
+		/// <summary>
 		/// Emits an instruction to test whether an object reference
 		/// (type O) is an instance of a particular class.
 		/// </summary>
