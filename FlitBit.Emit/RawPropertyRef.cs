@@ -1,5 +1,7 @@
 ﻿#region COPYRIGHT© 2009-2013 Phillip Clark. All rights reserved.
+
 // For licensing information see License.txt (MIT style licensing).
+
 #endregion
 
 using System;
@@ -7,12 +9,11 @@ using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Reflection.Emit;
 
-
 namespace FlitBit.Emit
 {
 	internal class RawPropertyRef : IPropertyRef
 	{
-		PropertyInfo _prop;
+		readonly PropertyInfo _prop;
 
 		public RawPropertyRef(PropertyInfo prop)
 		{
@@ -21,20 +22,16 @@ namespace FlitBit.Emit
 			_prop = prop;
 		}
 
+		#region IPropertyRef Members
+
 		public string Name
 		{
 			get { return _prop.Name; }
 		}
 
-		public PropertyInfo GetPropertyInfo()
-		{
-			return _prop;
-		}
+		public PropertyInfo GetPropertyInfo() { return _prop; }
 
-		public void LoadAddress(ILGenerator il)
-		{
-			throw new NotImplementedException();
-		}
+		public void LoadAddress(ILGenerator il) { throw new NotImplementedException(); }
 
 		public void LoadValue(ILGenerator il)
 		{
@@ -54,5 +51,7 @@ namespace FlitBit.Emit
 		{
 			get { return _prop.PropertyType; }
 		}
+
+		#endregion
 	}
 }

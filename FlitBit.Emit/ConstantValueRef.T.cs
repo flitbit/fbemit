@@ -1,5 +1,7 @@
 ﻿#region COPYRIGHT© 2009-2013 Phillip Clark. All rights reserved.
+
 // For licensing information see License.txt (MIT style licensing).
+
 #endregion
 
 using System;
@@ -8,24 +10,23 @@ using System.Reflection.Emit;
 namespace FlitBit.Emit
 {
 	/// <summary>
-	/// Reference to a raw value.
+	///   Reference to a raw value.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class ValueRef<T> : IValueRef
 	{
-		T _const;
+		readonly T _const;
 
 		/// <summary>
-		/// Creates a new instance.
+		///   Creates a new instance.
 		/// </summary>
 		/// <param name="value"></param>
-		public ValueRef(T value)
-		{
-			_const = value;
-		}
+		public ValueRef(T value) { _const = value; }
+
+		#region IValueRef Members
 
 		/// <summary>
-		/// The value's name.
+		///   The value's name.
 		/// </summary>
 		public string Name
 		{
@@ -33,7 +34,7 @@ namespace FlitBit.Emit
 		}
 
 		/// <summary>
-		/// Get's the value's target type.
+		///   Get's the value's target type.
 		/// </summary>
 		public Type TargetType
 		{
@@ -41,30 +42,23 @@ namespace FlitBit.Emit
 		}
 
 		/// <summary>
-		/// Loads the address of the value.
+		///   Loads the address of the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void LoadAddress(ILGenerator il)
-		{
-			throw new InvalidOperationException("Cannot load address of a constant");			
-		}
+		public void LoadAddress(ILGenerator il) { throw new InvalidOperationException("Cannot load address of a constant"); }
 
 		/// <summary>
-		/// Loads the value.
+		///   Loads the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void LoadValue(ILGenerator il)
-		{
-			il.LoadValue(_const);
-		}
+		public void LoadValue(ILGenerator il) { il.LoadValue(_const); }
 
 		/// <summary>
-		/// Stores the value.
+		///   Stores the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void StoreValue(ILGenerator il)
-		{
-			throw new InvalidOperationException("Cannot store value on a constant");
-		}
+		public void StoreValue(ILGenerator il) { throw new InvalidOperationException("Cannot store value on a constant"); }
+
+		#endregion
 	}
 }

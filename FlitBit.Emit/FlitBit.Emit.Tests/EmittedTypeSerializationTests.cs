@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using FlitBit.Core;
@@ -42,7 +41,7 @@ namespace FlitBit.Emit.Tests
 				var properties = intf.GetProperties();
 				foreach (var p in properties)
 				{
-					var property = p as PropertyInfo;
+					var property = p;
 					builder.DefinePropertyWithBackingField(property.Name, property.PropertyType);
 				}
 				builder.StubMethodsForInterface(intf, true, true);
@@ -55,7 +54,7 @@ namespace FlitBit.Emit.Tests
 		public void CanRoundTripSerializeEmittedType()
 		{
 			var gen = new DataGenerator();
-			ISerializedType it = (ISerializedType)Activator.CreateInstance(_type);
+			var it = (ISerializedType)Activator.CreateInstance(_type);
 			Assert.IsNotNull(it);
 			it.ID = gen.GetInt32();
 			it.Name = gen.GetString(60);
@@ -70,7 +69,7 @@ namespace FlitBit.Emit.Tests
 
 		static MemoryStream SerializeToStream<T>(T o)
 		{
-			MemoryStream stream = new MemoryStream();
+			var stream = new MemoryStream();
 			IFormatter formatter = new BinaryFormatter();
 			formatter.Serialize(stream, o);
 			return stream;
@@ -80,7 +79,7 @@ namespace FlitBit.Emit.Tests
 		{
 			IFormatter formatter = new BinaryFormatter();
 			stream.Seek(0, SeekOrigin.Begin);
-			T o = (T)formatter.Deserialize(stream);
+			var o = (T)formatter.Deserialize(stream);
 			return o;
 		}
 	}

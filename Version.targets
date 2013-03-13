@@ -5,7 +5,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>7</VersionMinor>
-    <VersionBuild>2</VersionBuild>
+    <VersionMinor>8</VersionMinor>
+    <VersionBuild>0</VersionBuild>
   </PropertyGroup>
 </Project>

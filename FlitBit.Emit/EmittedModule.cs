@@ -1,5 +1,7 @@
 ﻿#region COPYRIGHT© 2009-2013 Phillip Clark. All rights reserved.
+
 // For licensing information see License.txt (MIT style licensing).
+
 #endregion
 
 using System;
@@ -11,14 +13,14 @@ using System.Reflection.Emit;
 namespace FlitBit.Emit
 {
 	/// <summary>
-	/// Helper class for working with a modules in the IL stream.
+	///   Helper class for working with a modules in the IL stream.
 	/// </summary>
 	public class EmittedModule
 	{
-		Dictionary<string, EmittedClass> _classes = new Dictionary<string, EmittedClass>();
+		readonly Dictionary<string, EmittedClass> _classes = new Dictionary<string, EmittedClass>();
 
 		/// <summary>
-		/// Creates a new instance.
+		///   Creates a new instance.
 		/// </summary>
 		/// <param name="assembly">the assembly, owner</param>
 		/// <param name="name">the module's name</param>
@@ -40,46 +42,52 @@ namespace FlitBit.Emit
 		}
 
 		/// <summary>
-		/// Gets the assembly within which the module resides.
+		///   Gets the assembly within which the module resides.
 		/// </summary>
 		public EmittedAssembly Assembly { get; private set; }
+
 		/// <summary>
-		/// Gets the underlying ModuleBuilder for the module.
+		///   Gets the underlying ModuleBuilder for the module.
 		/// </summary>
 		public ModuleBuilder Builder { get; private set; }
+
 		/// <summary>
-		/// Gets the module's name.
-		/// </summary>
-		public string Name { get; private set; }
-		/// <summary>
-		/// Gets the default namespace for the module.
-		/// </summary>
-		public string Namespace { get; private set; }
-		/// <summary>
-		/// Indicates whether the module has been compiled.
+		///   Indicates whether the module has been compiled.
 		/// </summary>
 		public bool IsCompiled { get; private set; }
 
 		/// <summary>
-		/// Compiles the module.
+		///   Gets the module's name.
+		/// </summary>
+		public string Name { get; private set; }
+
+		/// <summary>
+		///   Gets the default namespace for the module.
+		/// </summary>
+		public string Namespace { get; private set; }
+
+		/// <summary>
+		///   Compiles the module.
 		/// </summary>
 		/// <returns></returns>
 		public Module Compile()
 		{
 			Contract.Requires<ArgumentNullException>(!IsCompiled, "module already compiled");
 
-			foreach (EmittedClass c in this._classes.Values)
+			foreach (var c in this._classes.Values)
 			{
 				// Classes may have been individually compiled.
 				if (!c.IsCompiled)
+				{
 					c.Compile();
+				}
 			}
 			this.IsCompiled = true;
 			return this.Builder;
 		}
 
 		/// <summary>
-		/// Defines a class.
+		///   Defines a class.
 		/// </summary>
 		/// <param name="name">the class' name</param>
 		/// <returns>the emitted class</returns>
@@ -91,13 +99,13 @@ namespace FlitBit.Emit
 
 			CheckClassName(name);
 
-			EmittedClass cls = new EmittedClass(Builder, name);
+			var cls = new EmittedClass(Builder, name);
 			_classes.Add(name, cls);
 			return cls;
 		}
 
 		/// <summary>
-		/// Defines a class
+		///   Defines a class
 		/// </summary>
 		/// <param name="name">the class' name</param>
 		/// <param name="attributes">the class' attributes</param>
@@ -112,25 +120,13 @@ namespace FlitBit.Emit
 
 			CheckClassName(name);
 
-			EmittedClass cls = new EmittedClass(Builder, name, attributes, supertype, interfaces);
+			var cls = new EmittedClass(Builder, name, attributes, supertype, interfaces);
 			_classes.Add(name, cls);
 			return cls;
 		}
 
-		private void CheckClassName(string name)
-		{
-			Contract.Requires<ArgumentNullException>(name != null);
-			Contract.Requires<ArgumentNullException>(name.Length > 0);
-
-			if (_classes.ContainsKey(name))
-				throw new InvalidOperationException(String.Concat(
-					"Unable to generate duplicate class. The class name is already in use: module = ",
-					this.Name, ", class = ", name)
-					);
-		}
-
 		/// <summary>
-		/// Saves the module.
+		///   Saves the module.
 		/// </summary>
 		internal void Save()
 		{
@@ -140,6 +136,20 @@ namespace FlitBit.Emit
 				this.Assembly.Compile();
 			}
 			this.Assembly.Save(this);
+		}
+
+		void CheckClassName(string name)
+		{
+			Contract.Requires<ArgumentNullException>(name != null);
+			Contract.Requires<ArgumentNullException>(name.Length > 0);
+
+			if (_classes.ContainsKey(name))
+			{
+				throw new InvalidOperationException(String.Concat(
+																												 "Unable to generate duplicate class. The class name is already in use: module = ",
+																												this.Name, ", class = ", name)
+					);
+			}
 		}
 	}
 }
