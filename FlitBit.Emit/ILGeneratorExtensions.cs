@@ -815,7 +815,7 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).GetGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 2, 1)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), argType, argType)
 																	.MakeGenericMethod(argType));
 					}
 					else
@@ -948,7 +948,7 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).GetGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 2, 1)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), argType, argType)
 																	.MakeGenericMethod(argType));
 						il.Load_I4_1();
 						il.CompareEqual();

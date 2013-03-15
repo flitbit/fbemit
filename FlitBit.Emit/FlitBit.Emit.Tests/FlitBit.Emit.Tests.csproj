@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="EmittedClassTests.cs" />
     <Compile Include="EmittedTypeSerializationTests.cs" />
+    <Compile Include="ExtensionsTests.cs" />
     <Compile Include="MiscTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

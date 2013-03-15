@@ -111,7 +111,8 @@ namespace FlitBit.Emit
 		/// <param name="binding">binding flags</param>
 		/// <param name="parameterCount">number of parameters on the target method</param>
 		/// <param name="genericArgumentCount">number of generic arguments on the target method</param>
-		/// <returns>a property or null</returns>
+		/// <returns>a method or null</returns>
+		[Obsolete("Use the more specific `MatchGenericMethod`")]
 		public static MethodInfo GetGenericMethod(this Type type, string name, BindingFlags binding
 			, int parameterCount, int genericArgumentCount)
 		{
@@ -134,7 +135,8 @@ namespace FlitBit.Emit
 		/// <param name="name">the property name</param>
 		/// <param name="parameterCount">number of parameters on the target method</param>
 		/// <param name="genericArgumentCount">number of generic arguments on the target method</param>
-		/// <returns>a property or null</returns>
+		/// <returns>a method or null</returns>
+		[Obsolete("Use the more specific `MatchGenericMethod`")]
 		public static MethodInfo GetGenericMethod(this Type type, string name, int parameterCount, int genericArgumentCount)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
@@ -153,6 +155,99 @@ namespace FlitBit.Emit
 			return (from c in candidates
 							where c.ParameterCount == parameterCount && c.GenericArgumentCount == genericArgumentCount
 							select c.Method).SingleOrDefault();
+		}
+
+		/// <summary>
+		///   Matches a public generic instance method on the target type.
+		/// </summary>
+		/// <param name="type">the target type</param>
+		/// <param name="name">the property name</param>
+		/// <param name="genericArgumentCount">number of generic arguments on the target method</param>
+		/// <param name="returnType">the return type expected on the generic method</param>
+		/// <param name="parameterTypes">the parameter types expected on the generic method</param>
+		/// <returns>Either the first matching generic method or null.</returns>
+		public static MethodInfo MatchGenericMethod(this Type type, string name,
+			int genericArgumentCount, Type returnType, params Type[] parameterTypes)
+		{
+			return MatchGenericMethod(type, name, BindingFlags.Instance | BindingFlags.Public, genericArgumentCount, returnType,
+																parameterTypes);
+		}
+
+		/// <summary>
+		///   Matches a generic method on the target type.
+		/// </summary>
+		/// <param name="type">the target type</param>
+		/// <param name="name">the property name</param>
+		/// <param name="binding">binding flags</param>
+		/// <param name="genericArgumentCount">number of generic arguments on the target method</param>
+		/// <param name="returnType">the return type expected on the generic method</param>
+		/// <param name="parameterTypes">the parameter types expected on the generic method</param>
+		/// <returns>Either the first matching generic method or null.</returns>
+		public static MethodInfo MatchGenericMethod(this Type type, string name, BindingFlags binding, int genericArgumentCount, Type returnType, params Type[] parameterTypes)
+		{
+			Contract.Requires<ArgumentNullException>(type != null);
+			Contract.Requires<ArgumentNullException>(name != null);
+			Contract.Requires<ArgumentNullException>(name.Length > 0);
+			Contract.Requires<ArgumentNullException>(genericArgumentCount > 0);
+			var candidates = from m in type.GetMethods(binding)
+											where String.Equals(name, m.Name, StringComparison.Ordinal)
+												&& m.IsGenericMethodDefinition
+												&& m.GetGenericArguments().Count() == genericArgumentCount
+												&& m.GetParameters().Count() == parameterTypes.Length
+											select m;
+			var ub = parameterTypes.Length;
+			foreach (var candidate in candidates)
+			{
+				if (IsParameterTypeCompatible(candidate.ReturnType, returnType))
+				{
+					var ptypes = candidate.GetParameters();
+					var i = 0;
+					for (; i < ub; i++)
+					{
+						var p = ptypes[i].ParameterType;
+						if (!IsParameterTypeCompatible(p, parameterTypes[i]))
+						{
+							break;
+						}
+					}
+					if (i == ub) return candidate;
+				}
+			}
+			return null;
+		}
+
+		static bool IsParameterTypeCompatible(Type target, Type candidate)
+		{	
+			if (target == candidate || target.IsAssignableFrom(candidate))
+			{
+				return true;
+			}
+			if (target.IsGenericParameter)
+			{
+				var constraints = target.GetGenericParameterConstraints();
+				// Ensure it is assignable as expected by the constraints...
+				if (constraints.All(constraint => constraint.IsAssignableFrom(candidate)))
+				{
+					if (target.GenericParameterAttributes != GenericParameterAttributes.None)
+					{
+						if (target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
+						{
+							if (!candidate.IsClass || target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)
+								&& candidate.GetConstructor(Type.EmptyTypes) == null)
+							{
+								return false;
+							}
+						}
+						if (target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint)
+							&& !candidate.IsValueType)
+						{
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/// <summary>
