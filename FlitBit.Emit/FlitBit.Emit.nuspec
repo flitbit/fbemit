@@ -10,7 +10,7 @@
 		<projectUrl>http://fbemit.codeplex.com/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>More extension methods over ILGenerator.</releaseNotes>
+		<releaseNotes>Added an extension method to get/match generic methods by compatability.</releaseNotes>
 		<copyright>Copyright 2013</copyright>
 	</metadata>
 </package>
