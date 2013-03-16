@@ -31,10 +31,7 @@ namespace FlitBit.Emit
 				Version = current.Version,
 				CultureInfo = current.CultureInfo
 			};
-
-			var assem = new EmittedAssembly(name, name.Name);
-			AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
-			return assem;
+			return GetEmittedAssemblyWithEmitWhenNotFound(name, asm => { });
 		}, LazyThreadSafetyMode.ExecutionAndPublication);
 
 		[SuppressMessage("Microsoft.Performance", "CA1810")]
@@ -42,6 +39,7 @@ namespace FlitBit.Emit
 		{
 			AppDomain.CurrentDomain.TypeResolve += CurrentDomain_TypeResolve;
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+			AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
 		}
 
 		/// <summary>
@@ -123,7 +121,7 @@ namespace FlitBit.Emit
 			{
 				if (!Assemblies.TryGetValue(name.FullName, out asm))
 				{
-					asm = new EmittedAssembly(name, String.Empty);
+					asm = new EmittedAssembly(name, null);
 					emitter(asm);
 					asm.Compile();
 					Assemblies.Add(name.FullName, asm);
@@ -191,7 +189,10 @@ namespace FlitBit.Emit
 				{
 					foreach (var asm in Assemblies.Values)
 					{
-						asm.Compile();
+						if (!asm.IsCompiled)
+						{
+							asm.Compile();
+						}
 						asm.Save();
 					}
 				}

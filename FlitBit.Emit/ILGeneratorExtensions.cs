@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
@@ -558,7 +559,15 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			var method = typeof(T).GetMethod(name, types);
+			MethodInfo method;
+			if (types == null || types.Length == 0)
+			{
+				method = typeof(T).GetMethod(name);
+			}
+			else
+			{
+				method = typeof(T).GetMethod(name, types);
+			}
 			Contract.Assert(method != null, "method lookup failed");
 
 			il.EmitCall(OpCodes.Call, method, null);
@@ -570,15 +579,25 @@ namespace FlitBit.Emit
 		/// <typeparam name="T">type T</typeparam>
 		/// <param name="il">an ILGenerator where instructions are emitted</param>
 		/// <param name="name">name of the method to call</param>
-		/// <param name="bindingAttr">method binding flags used to lookup the method</param>
+		/// <param name="binding">method binding flags used to lookup the method</param>
 		/// <param name="types">parameters that differentiate the method to call</param>
-		public static void Call<T>(this ILGenerator il, string name, BindingFlags bindingAttr, params Type[] types)
+		public static void Call<T>(this ILGenerator il, string name, BindingFlags binding, params Type[] types)
 		{
 			Contract.Requires<ArgumentNullException>(il != null);
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			var method = typeof(T).GetMethod(name, bindingAttr, null, types, null);
+			MethodInfo method;
+			if (types == null || types.Length == 0)
+			{
+				method = (from m in typeof(T).GetMethods(binding)
+									where m.Name == name
+									select m).SingleOrDefault();
+			}
+			else
+			{
+				method = typeof(T).GetMethod(name, binding, null, types, null);
+			} 
 			Contract.Assert(method != null, "method lookup failed");
 
 			il.EmitCall(OpCodes.Call, method, null);
@@ -688,8 +707,16 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			var method = typeof(T).GetMethod(name, parameterTypes);
-			Contract.Assert(method != null, "method lookup failed");
+			MethodInfo method;
+			if (parameterTypes == null || parameterTypes.Length == 0)
+			{
+				method = typeof(T).GetMethod(name);
+			}
+			else
+			{
+				method = typeof(T).GetMethod(name, parameterTypes);
+			}
+			Contract.Assert(method != null, "method lookup failed"); 
 
 			il.EmitCall(OpCodes.Callvirt, method, null);
 		}
@@ -709,7 +736,17 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			var method = typeof(T).GetMethod(name, binding, null, parameterTypes, null);
+			MethodInfo method;
+			if (parameterTypes == null || parameterTypes.Length == 0)
+			{
+				method = (from m in typeof(T).GetMethods(binding)
+									where m.Name == name
+									select m).SingleOrDefault();
+			}
+			else
+			{
+				method = typeof(T).GetMethod(name, binding, null, parameterTypes, null);
+			}
 			Contract.Assert(method != null, "method lookup failed");
 
 			il.EmitCall(OpCodes.Callvirt, method, null);
@@ -815,7 +852,7 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), argType, argType)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type, type)
 																	.MakeGenericMethod(argType));
 					}
 					else
@@ -948,7 +985,7 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), argType, argType)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type, type)
 																	.MakeGenericMethod(argType));
 						il.Load_I4_1();
 						il.CompareEqual();
@@ -1724,6 +1761,18 @@ namespace FlitBit.Emit
 					il.Emit(OpCodes.Ldarg, index);
 					break;
 			}
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <param name="il"></param>
+		/// <param name="parameter"></param>
+		public static void LoadArg(this ILGenerator il, EmittedParameter parameter)
+		{
+			Contract.Requires<ArgumentNullException>(il != null);
+			Contract.Requires<ArgumentNullException>(parameter != null, "Parameter cannot be null");
+			var ofs = (parameter.Method.IsStatic) ? 0 : 1;
+			il.Emit(OpCodes.Ldarg, parameter.Index + ofs);
 		}
 
 		/// <summary>

@@ -247,6 +247,12 @@ namespace FlitBit.Emit
 					return true;
 				}
 			}
+			if (target.IsGenericType && candidate.IsGenericType)
+			{
+				var targetDef = target.GetGenericTypeDefinition();
+				var candidateDef = candidate.GetGenericTypeDefinition();
+				return (targetDef == candidateDef);
+			}
 			return false;
 		}
 

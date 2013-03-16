@@ -52,8 +52,6 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
-			Contract.Requires<ArgumentNullException>(rootNamespace != null);
-			Contract.Requires<ArgumentNullException>(rootNamespace.Length > 0);
 			Contract.Requires<ArgumentNullException>(version != null);
 			Contract.Requires<ArgumentNullException>(culture != null);
 
@@ -71,8 +69,6 @@ namespace FlitBit.Emit
 		public EmittedAssembly(AssemblyName name, string rootNamespace)
 		{
 			Contract.Requires<ArgumentNullException>(name != null);
-			Contract.Requires<ArgumentNullException>(rootNamespace != null);
-			Contract.Requires<ArgumentNullException>(rootNamespace.Length > 0);
 
 			FinishConstruction(name, rootNamespace);
 		}
@@ -108,7 +104,7 @@ namespace FlitBit.Emit
 		/// <returns></returns>
 		public Assembly Compile()
 		{
-			Contract.Requires<ArgumentNullException>(!IsCompiled, "already compiled");
+			Contract.Requires<InvalidOperationException>(!IsCompiled, "already compiled");
 
 			foreach (var m in this._modules.Values)
 			{
