@@ -597,7 +597,7 @@ namespace FlitBit.Emit
 			else
 			{
 				method = typeof(T).GetMethod(name, binding, null, types, null);
-			} 
+			}
 			Contract.Assert(method != null, "method lookup failed");
 
 			il.EmitCall(OpCodes.Call, method, null);
@@ -716,7 +716,7 @@ namespace FlitBit.Emit
 			{
 				method = typeof(T).GetMethod(name, parameterTypes);
 			}
-			Contract.Assert(method != null, "method lookup failed"); 
+			Contract.Assert(method != null, "method lookup failed");
 
 			il.EmitCall(OpCodes.Callvirt, method, null);
 		}
@@ -763,6 +763,18 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(targetType != null, "targetType cannot be null");
 
 			il.Emit(OpCodes.Castclass, targetType);
+		}
+
+		/// <summary>
+		///   Casts to the target type.
+		/// </summary>
+		/// <param name="il">an ILGenerator where instructions are emitted</param>
+		/// <typeparam name="T">target type T</typeparam>
+		public static void CastClass<T>(this ILGenerator il)
+		{
+			Contract.Requires<ArgumentNullException>(il != null);
+
+			il.Emit(OpCodes.Castclass, typeof(T));
 		}
 
 		/// <summary>
@@ -852,7 +864,8 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type, type)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type,
+																											type)
 																	.MakeGenericMethod(argType));
 					}
 					else
@@ -985,7 +998,8 @@ namespace FlitBit.Emit
 					{
 						var argType = type.GetGenericArguments()[0];
 						il.Call(
-									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type, type)
+									 typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), type,
+																											type)
 																	.MakeGenericMethod(argType));
 						il.Load_I4_1();
 						il.CompareEqual();
@@ -1601,6 +1615,18 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(il != null);
 			return il.DeclareLocal(localType);
+		}
+
+		/// <summary>
+		/// Declares a local variable.
+		/// </summary>
+		/// <param name="il">an ILGenerator where instructions are emitted</param>
+		/// <typeparam name="T">the variable's type T</typeparam>
+		/// <returns>a local builder</returns>
+		public static LocalBuilder DeclareLocal<T>(this ILGenerator il)
+		{
+			Contract.Requires<ArgumentNullException>(il != null);
+			return il.DeclareLocal(typeof(T));
 		}
 
 		/// <summary>

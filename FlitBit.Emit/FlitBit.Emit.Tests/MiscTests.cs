@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,30 +8,6 @@ namespace FlitBit.Emit.Tests
 	[TestClass]
 	public class MiscTests
 	{
-		interface I: IDisposable
-		{
-		}
-		interface II : I
-		{
-		}
-		class C : I, IDisposable
-		{
-			public void Dispose()
-			{
-				throw new NotImplementedException();
-			}
-		}
-		class D : I, II, IDisposable
-		{
-			public void Dispose()
-			{
-				throw new NotImplementedException();
-			}
-		}
-		class E : C, II
-		{			
-		}
-
 		[TestMethod]
 		public void FlattenTypeHierarchy()
 		{
@@ -48,7 +23,7 @@ namespace FlitBit.Emit.Tests
 			Assert.AreEqual(typeof(IDisposable), types.Dequeue());
 			Assert.AreEqual(typeof(I), types.Dequeue());
 			Assert.AreEqual(typeof(II), types.Dequeue());
-			
+
 			types = new Queue<Type>(typeof(C).GetTypeHierarchyInDeclarationOrder());
 			Assert.IsNotNull(types);
 			Assert.AreEqual(4, types.Count());
@@ -76,5 +51,32 @@ namespace FlitBit.Emit.Tests
 			Assert.AreEqual(typeof(II), types.Dequeue());
 			Assert.AreEqual(typeof(E), types.Dequeue());
 		}
+
+		class C : I, IDisposable
+		{
+			#region I Members
+
+			public void Dispose() { throw new NotImplementedException(); }
+
+			#endregion
+		}
+
+		class D : I, II, IDisposable
+		{
+			#region I Members
+
+			public void Dispose() { throw new NotImplementedException(); }
+
+			#endregion
+		}
+
+		class E : C, II
+		{}
+
+		interface I : IDisposable
+		{}
+
+		interface II : I
+		{}
 	}
 }

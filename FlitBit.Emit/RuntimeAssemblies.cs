@@ -199,7 +199,9 @@ namespace FlitBit.Emit
 			}
 // ReSharper disable EmptyGeneralCatchClause
 			catch
-			{ /* purposely suppressing exceptions while trying to write dynamic assembly on exit */ }
+			{
+				/* purposely suppressing exceptions while trying to write dynamic assembly on exit */
+			}
 // ReSharper restore EmptyGeneralCatchClause
 		}
 

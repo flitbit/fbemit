@@ -85,8 +85,8 @@ namespace FlitBit.Emit.Tests
 		ushort UInt16 { get; set; }
 		uint UInt32 { get; set; }
 		ulong UInt64 { get; set; }
-	}						
-	
+	}
+
 	[TestClass]
 	public class EmittedTypeSerializationTests
 	{
@@ -97,9 +97,9 @@ namespace FlitBit.Emit.Tests
 		{
 			const int iterations = 10000;
 			var gen = new DataGenerator();
-			for (int i = 0; i < iterations; i++)
+			for (var i = 0; i < iterations; i++)
 			{
-				var it = (ITestSamplingOfTypes)Activator.CreateInstance(_type);
+				var it = (ITestSamplingOfTypes) Activator.CreateInstance(_type);
 				Assert.IsNotNull(it);
 				it.Boolean = gen.GetBoolean();
 				it.Byte = gen.GetByte();
@@ -116,30 +116,30 @@ namespace FlitBit.Emit.Tests
 				it.MyByteEnum = gen.GetEnum<MyByteEnum>();
 				it.MyInt16Enum = gen.GetEnum<MyInt16Enum>();
 				it.MyInt32Enum = gen.GetEnum<MyInt32Enum>();
-				it.NullableBoolean = gen.GetBoolean() ? gen.GetBoolean() : (bool?)null;
-				it.NullableByte = gen.GetBoolean() ? gen.GetByte() : (byte?)null;
-				it.NullableChar = gen.GetBoolean() ? gen.GetChar() : (char?)null;
-				it.NullableDateTime = gen.GetBoolean() ? gen.GetDateTime() : (DateTime?)null;
-				it.NullableDateTimeOffeset = gen.GetBoolean() ? gen.GetDateTimeOffset() : (DateTimeOffset?)null;
-				it.NullableDecimal = gen.GetBoolean() ? gen.GetDecimal() : (decimal?)null;
-				it.NullableDouble = gen.GetBoolean() ? gen.GetDouble() : (double?)null;
-				it.NullableFloat = gen.GetBoolean() ? gen.GetSingle() : (float?)null;
-				it.NullableGuid = gen.GetBoolean() ? gen.GetGuid() : (Guid?)null;
-				it.NullableInt16 = gen.GetBoolean() ? gen.GetInt16() : (short?)null;
-				it.NullableInt32 = gen.GetBoolean() ? gen.GetInt32() : (int?)null;
-				it.NullableInt64 = gen.GetBoolean() ? gen.GetInt64() : (long?)null;
-				it.NullableMyByteEnum = gen.GetBoolean() ? gen.GetEnum<MyByteEnum>() : (MyByteEnum?)null;
-				it.NullableMyInt16Enum = gen.GetBoolean() ? gen.GetEnum<MyInt16Enum>() : (MyInt16Enum?)null;
-				it.NullableMyInt32Enum = gen.GetBoolean() ? gen.GetEnum<MyInt32Enum>() : (MyInt32Enum?)null;
-				it.NullableSByte = gen.GetBoolean() ? gen.GetSByte() : (sbyte?)null;
+				it.NullableBoolean = gen.GetBoolean() ? gen.GetBoolean() : (bool?) null;
+				it.NullableByte = gen.GetBoolean() ? gen.GetByte() : (byte?) null;
+				it.NullableChar = gen.GetBoolean() ? gen.GetChar() : (char?) null;
+				it.NullableDateTime = gen.GetBoolean() ? gen.GetDateTime() : (DateTime?) null;
+				it.NullableDateTimeOffeset = gen.GetBoolean() ? gen.GetDateTimeOffset() : (DateTimeOffset?) null;
+				it.NullableDecimal = gen.GetBoolean() ? gen.GetDecimal() : (decimal?) null;
+				it.NullableDouble = gen.GetBoolean() ? gen.GetDouble() : (double?) null;
+				it.NullableFloat = gen.GetBoolean() ? gen.GetSingle() : (float?) null;
+				it.NullableGuid = gen.GetBoolean() ? gen.GetGuid() : (Guid?) null;
+				it.NullableInt16 = gen.GetBoolean() ? gen.GetInt16() : (short?) null;
+				it.NullableInt32 = gen.GetBoolean() ? gen.GetInt32() : (int?) null;
+				it.NullableInt64 = gen.GetBoolean() ? gen.GetInt64() : (long?) null;
+				it.NullableMyByteEnum = gen.GetBoolean() ? gen.GetEnum<MyByteEnum>() : (MyByteEnum?) null;
+				it.NullableMyInt16Enum = gen.GetBoolean() ? gen.GetEnum<MyInt16Enum>() : (MyInt16Enum?) null;
+				it.NullableMyInt32Enum = gen.GetBoolean() ? gen.GetEnum<MyInt32Enum>() : (MyInt32Enum?) null;
+				it.NullableSByte = gen.GetBoolean() ? gen.GetSByte() : (sbyte?) null;
 				it.SByte = gen.GetSByte();
 				it.String = gen.GetString(Math.Max(gen.GetInt32() % 256, 1));
 				it.UInt16 = gen.GetUInt16();
 				it.UInt32 = gen.GetUInt32();
 				it.UInt64 = gen.GetUInt64();
-				it.NullableUInt16 = gen.GetBoolean() ? gen.GetUInt16() : (ushort?)null;
-				it.NullableUInt32 = gen.GetBoolean() ? gen.GetUInt32() : (uint?)null;
-				it.NullableUInt64 = gen.GetBoolean() ? gen.GetUInt64() : (ulong?)null;
+				it.NullableUInt16 = gen.GetBoolean() ? gen.GetUInt16() : (ushort?) null;
+				it.NullableUInt32 = gen.GetBoolean() ? gen.GetUInt32() : (uint?) null;
+				it.NullableUInt64 = gen.GetBoolean() ? gen.GetUInt64() : (ulong?) null;
 
 				using (var serialized = SerializeToStream(it))
 				{
@@ -218,8 +218,8 @@ namespace FlitBit.Emit.Tests
 			});
 
 			foreach (var intf in from type in tt.GetTypeHierarchyInDeclarationOrder()
-													 where type.IsInterface
-													 select type)
+													where type.IsInterface
+													select type)
 			{
 				builder.AddInterfaceImplementation(intf);
 				var properties = intf.GetProperties();
@@ -237,6 +237,14 @@ namespace FlitBit.Emit.Tests
 			_type = builder.Ref.Target;
 		}
 
+		static T DeserializeFromStream<T>(MemoryStream stream)
+		{
+			IFormatter formatter = new BinaryFormatter();
+			stream.Seek(0, SeekOrigin.Begin);
+			var o = (T) formatter.Deserialize(stream);
+			return o;
+		}
+
 		static EmittedMethod ImplementSpecializedEquals<T>(EmittedClass builder)
 		{
 			var equatable = typeof(IEquatable<>).MakeGenericType(builder.Builder);
@@ -244,14 +252,15 @@ namespace FlitBit.Emit.Tests
 
 			var specializedEquals = builder.DefineMethod("Equals");
 			specializedEquals.ClearAttributes();
-			specializedEquals.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
+			specializedEquals.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
+				MethodAttributes.Virtual | MethodAttributes.Final);
 			specializedEquals.ReturnType = TypeRef.FromType<bool>();
 			var other = specializedEquals.DefineParameter("other", builder.Ref);
 
 			specializedEquals.ContributeInstructions((m, il) =>
 			{
 				il.DeclareLocal(typeof(bool));
-				Label exitFalse = il.DefineLabel();
+				var exitFalse = il.DefineLabel();
 				il.Nop();
 
 				var fields =
@@ -263,9 +272,8 @@ namespace FlitBit.Emit.Tests
 					if (fieldType.IsArray)
 					{
 						LoadFieldFromThisAndParam(il, field, other);
-						il.Call(typeof(FlitBit.Core.Extensions).GetMethod("EqualsOrItemsEqual", BindingFlags.Static | BindingFlags.Public)
-																			.MakeGenericMethod(fieldType));
-
+						il.Call(typeof(Core.Extensions).GetMethod("EqualsOrItemsEqual", BindingFlags.Static | BindingFlags.Public)
+																					.MakeGenericMethod(fieldType));
 					}
 					else if (fieldType.IsClass)
 					{
@@ -283,7 +291,7 @@ namespace FlitBit.Emit.Tests
 							il.CallVirtual(typeof(IEqualityComparer<>).MakeGenericType(fieldType)
 																												.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance,
 																																	null,
-																																	new[] { fieldType, fieldType },
+																																	new[] {fieldType, fieldType},
 																																	null
 															));
 						}
@@ -338,26 +346,17 @@ namespace FlitBit.Emit.Tests
 			builder.AddInterfaceImplementation(equatableT);
 			var equalsT = builder.DefineMethod("Equals");
 			equalsT.ClearAttributes();
-			equalsT.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
+			equalsT.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
+				MethodAttributes.Virtual | MethodAttributes.Final);
 			equalsT.ReturnType = TypeRef.FromType<bool>();
 			equalsT.DefineParameter("other", typeof(T));
 			equalsT.ContributeInstructions(contributedEquals);
 
 			builder.DefineOverrideMethod(typeof(Object).GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public, null,
-																															new[] { typeof(object) }, null))
+																														new[] {typeof(object)}, null))
 						.ContributeInstructions(contributedEquals);
 
 			return specializedEquals;
-		}
-
-		static void LoadFieldFromThisAndParam(ILGenerator il, EmittedField field, EmittedParameter parm)
-		{
-			Contract.Requires<ArgumentNullException>(il != null);
-			Contract.Requires<ArgumentNullException>(field != null);
-			il.LoadArg_0();
-			il.LoadField(field);
-			il.LoadArg(parm);
-			il.LoadField(field);
 		}
 
 		static void ImplementSpecializedGetHashCode(EmittedClass builder, EmittedField chashCodeSeed)
@@ -471,7 +470,7 @@ namespace FlitBit.Emit.Tests
 								il.LoadField(field);
 								il.LoadLocal(result);
 								il.Call(typeof(Core.Extensions).GetMethod("CalculateCombinedHashcode", BindingFlags.Public | BindingFlags.Static)
-																					.MakeGenericMethod(elmType));
+																							.MakeGenericMethod(elmType));
 								il.Multiply();
 								il.Xor();
 								il.StoreLocal(result);
@@ -552,12 +551,14 @@ namespace FlitBit.Emit.Tests
 			});
 		}
 
-		static T DeserializeFromStream<T>(MemoryStream stream)
+		static void LoadFieldFromThisAndParam(ILGenerator il, EmittedField field, EmittedParameter parm)
 		{
-			IFormatter formatter = new BinaryFormatter();
-			stream.Seek(0, SeekOrigin.Begin);
-			var o = (T)formatter.Deserialize(stream);
-			return o;
+			Contract.Requires<ArgumentNullException>(il != null);
+			Contract.Requires<ArgumentNullException>(field != null);
+			il.LoadArg_0();
+			il.LoadField(field);
+			il.LoadArg(parm);
+			il.LoadField(field);
 		}
 
 		static MemoryStream SerializeToStream<T>(T o)

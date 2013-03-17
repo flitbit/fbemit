@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Net;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
 
 namespace FlitBit.Emit.Tests
 {
@@ -11,12 +11,16 @@ namespace FlitBit.Emit.Tests
 		public T OneArg(string s) { return default(T); }
 		public T OneArg<TArg>(TArg arg) where TArg : class { return default(T); }
 		public TResult OneArg<TResult>(string name) { return default(TResult); }
-		public void OneArgOneOtherArg<TArg>(TArg arg, string another) {  }
 		public TResult OneArg<TResult>(params String[] p) where TResult : struct { return default(TResult); }
+		public void OneArgOneOtherArg<TArg>(TArg arg, string another) { }
 	}
 
-	public interface IBase<T> { }
-	public interface IDerived<T> : IBase<T> { }
+	public interface IBase<T>
+	{}
+
+	public interface IDerived<T> : IBase<T>
+	{}
+
 	public interface IUseBase<T>
 	{
 		void TryAndMatchThisGeneric<TT>(IBase<T> one, IBase<T> two) where TT : T;
@@ -26,6 +30,13 @@ namespace FlitBit.Emit.Tests
 	public class ExtensionsTests
 	{
 		[TestMethod]
+		public void MatchGenericMethod_FailsMatchWhenIncompatable()
+		{
+			var m = typeof(UsedForTesting<string>).MatchGenericMethod("OneArg", 1, typeof(string), typeof(DateTime));
+			Assert.IsNull(m);
+		}
+
+		[TestMethod]
 		public void MatchGenericMethod_MatchesCompatible()
 		{
 			var m = typeof(UsedForTesting<string>).MatchGenericMethod("OneArg", 1, typeof(string), typeof(string));
@@ -34,19 +45,30 @@ namespace FlitBit.Emit.Tests
 		}
 
 		[TestMethod]
-		public void MatchGenericMethod_MatchesCompatibleVoidReturnType()
+		public void MatchGenericMethod_MatchesCompatibleCandidateHasAssignableGenericArguments()
 		{
-			var m = typeof(UsedForTesting<string>).MatchGenericMethod("OneArgOneOtherArg", 1, typeof(void), typeof(int), typeof(string));
+			var m = typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool),
+																									typeof(int?), typeof(int?));
 			Assert.IsNotNull(m);
 			Assert.IsNotNull(m.MakeGenericMethod(typeof(int)));
-
 		}
 
 		[TestMethod]
-		public void MatchGenericMethod_FailsMatchWhenIncompatable()
+		public void MatchGenericMethod_MatchesCompatibleCandidateHasAssignableGenericArguments_VariousCandidateOpenGenerics()
 		{
-			var m = typeof(UsedForTesting<string>).MatchGenericMethod("OneArg", 1, typeof(string), typeof(DateTime));
-			Assert.IsNull(m);
+			var m = typeof(IUseBase<WebRequest>).MatchGenericMethod("TryAndMatchThisGeneric", 1, typeof(void),
+																															typeof(IBase<HttpWebRequest>), typeof(IDerived<WebRequest>));
+			Assert.IsNotNull(m);
+			Assert.IsNotNull(m.MakeGenericMethod(typeof(HttpWebRequest)));
+		}
+
+		[TestMethod]
+		public void MatchGenericMethod_MatchesCompatibleVoidReturnType()
+		{
+			var m = typeof(UsedForTesting<string>).MatchGenericMethod("OneArgOneOtherArg", 1, typeof(void), typeof(int),
+																																typeof(string));
+			Assert.IsNotNull(m);
+			Assert.IsNotNull(m.MakeGenericMethod(typeof(int)));
 		}
 
 		[TestMethod]
@@ -58,21 +80,11 @@ namespace FlitBit.Emit.Tests
 		}
 
 		[TestMethod]
-		public void MatchGenericMethod_MatchesCompatibleCandidateHasAssignableGenericArguments()
+		public void MatchGenericMethod_CanMatchArrayGenericIndexOf()
 		{
-			
-			var m = typeof(Nullable).MatchGenericMethod("Equals", BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), typeof(int?), typeof(int?));
+			var m = typeof(Array).MatchGenericMethod("IndexOf", BindingFlags.Static | BindingFlags.Public,  1, typeof(int), typeof(string[]), typeof(string));
 			Assert.IsNotNull(m);
-			Assert.IsNotNull(m.MakeGenericMethod(typeof(int)));
+			Assert.IsNotNull(m.MakeGenericMethod(typeof(string)));
 		}
-
-		[TestMethod]
-		public void MatchGenericMethod_MatchesCompatibleCandidateHasAssignableGenericArguments_VariousCandidateOpenGenerics()
-		{
-			var m = typeof(IUseBase<WebRequest>).MatchGenericMethod("TryAndMatchThisGeneric", 1, typeof(void), typeof(IBase<HttpWebRequest>), typeof(IDerived<WebRequest>));
-			Assert.IsNotNull(m);
-			Assert.IsNotNull(m.MakeGenericMethod(typeof(HttpWebRequest)));
-		}
-
 	}
 }

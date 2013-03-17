@@ -8,29 +8,16 @@ namespace FlitBit.Emit.Tests
 	[TestClass]
 	public class EmittedClassTests
 	{
-		int _classCount = 0;
-
 		EmittedAssembly _assembly;
+		int _classCount = 0;
 		EmittedModule _module;
-
-		string NextClassName()
-		{
-			return String.Concat("Class_", Interlocked.Increment(ref _classCount));
-		}
-
-		[TestInitialize]
-		public void Init()
-		{			
-			_assembly = new EmittedAssembly(typeof(EmittedClassTests).Name, typeof(EmittedClassTests).Namespace);
-			_module = _assembly.BaseModule;
-		}
 
 		[TestCleanup]
 		public void Cleanup()
 		{
 			// output the assembly so we can eyeball the classes, etc.
 			_assembly.Compile();
-			_assembly.Save(); 
+			_assembly.Save();
 		}
 
 		[TestMethod]
@@ -38,17 +25,17 @@ namespace FlitBit.Emit.Tests
 		{
 			var cls = new EmittedClass(_module.Builder, NextClassName());
 			Assert.IsFalse(cls.IsCompiled);
-			
+
 			cls.Compile();
-			
+
 			Assert.IsTrue(cls.IsCompiled);
 			var generatedType = cls.Ref.Target;
-			Assert.IsNotNull(generatedType);			
+			Assert.IsNotNull(generatedType);
 
 			var obj = Activator.CreateInstance(generatedType);
 			Assert.IsNotNull(obj);
 		}
-		
+
 		[TestMethod]
 		public void EmittedClass_CanInitStaticField()
 		{
@@ -64,9 +51,18 @@ namespace FlitBit.Emit.Tests
 			var obj = Activator.CreateInstance(cls.Ref.Target);
 
 			Assert.IsNotNull(obj);
-			
-			FieldInfo __field = obj.GetType().GetField("__field", BindingFlags.NonPublic | BindingFlags.Instance);
-			Assert.AreEqual(13, (int)__field.GetValue(obj));
+
+			var __field = obj.GetType().GetField("__field", BindingFlags.NonPublic | BindingFlags.Instance);
+			Assert.AreEqual(13, (int) __field.GetValue(obj));
 		}
+
+		[TestInitialize]
+		public void Init()
+		{
+			_assembly = new EmittedAssembly(typeof(EmittedClassTests).Name, typeof(EmittedClassTests).Namespace);
+			_module = _assembly.BaseModule;
+		}
+
+		string NextClassName() { return String.Concat("Class_", Interlocked.Increment(ref _classCount)); }
 	}
 }
