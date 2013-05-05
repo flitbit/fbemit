@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -691,6 +692,382 @@ namespace FlitBit.Emit
 																												 @"Type already contains a member by the same name: member name = {0} type = {1}", name,
 																												this.Name));
 			}
+		}
+
+		/// <summary>
+		/// Specializes the base class' GetHashCode method.
+		/// </summary>
+		/// <param name="hashCodeSeed">a value reference to a hash code seed value.</param>
+		/// <param name="filtered">function that filters the class' fields from inclusion in the hashcode</param>
+		/// <param name="specialize">function that specializes the hashcode algorithm for a particular field</param>
+		/// <returns>the emitted, specialized GetHashCode method</returns>
+		/// <exception cref="ArgumentNullException">thrown if <paramref name="hashCodeSeed"/> is null.</exception>
+		/// <exception cref="InvalidOperationException">thrown if a field member cannot be included in the hashcode; these should be handled by the provided <paramref name="specialize"/> method.</exception>
+		public EmittedMethod SpecializeGetHashCode(IValueRef hashCodeSeed,
+				Func<EmittedField, bool> filtered,
+				Func<EmittedClass, EmittedField, int, LocalBuilder, ILGenerator, bool> specialize)
+		{
+			Contract.Requires<ArgumentNullException>(hashCodeSeed != null);
+
+			var method = this.DefineMethod("GetHashCode");
+			method.ClearAttributes();
+			method.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+			method.ReturnType = TypeRef.FromType<int>();
+			method.ContributeInstructions((m, il) =>
+			{
+				var result = il.DeclareLocal(typeof(Int32));
+				il.DeclareLocal(typeof(Int32));
+				il.DeclareLocal(typeof(bool));
+				il.Nop();
+				il.LoadValue(hashCodeSeed);
+				il.LoadValue(Constants.NotSoRandomPrime);
+				il.Multiply();
+				il.StoreLocal(result);
+				var exit = il.DefineLabel();
+				var fields =
+					new List<EmittedField>(
+						this.Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
+				foreach (var field in fields)
+				{
+					if (specialize != null && specialize(this, field, Constants.NotSoRandomPrime, result, il))
+					{
+						continue;
+					}
+					var fieldType = field.FieldType.Target;
+					var tc = Type.GetTypeCode(fieldType);
+					Label lbl;
+					switch (tc)
+					{
+						case TypeCode.Boolean:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadField(field);
+							var conv = typeof(Convert).GetMethod("ToInt32", BindingFlags.Static | BindingFlags.Public, null,
+																									new[] { typeof(bool) }, null);
+							il.Call(conv);
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Byte:
+						case TypeCode.Char:
+						case TypeCode.Int16:
+						case TypeCode.Int32:
+						case TypeCode.SByte:
+						case TypeCode.UInt16:
+						case TypeCode.UInt32:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadField(field);
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Single:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.ConvertToFloat32();
+							il.LoadArg_0();
+							il.LoadField(field);
+							il.Multiply();
+							il.ConvertToInt32();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.DateTime:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadFieldAddress(field);
+							il.Constrained(typeof(DateTime));
+							il.CallVirtual<object>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Decimal:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadFieldAddress(field);
+							il.Call<Decimal>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Double:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadFieldAddress(field);
+							il.Call<Double>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Int64:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadFieldAddress(field);
+							il.Constrained(typeof(Int64));
+							il.CallVirtual<object>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						case TypeCode.Object:
+							if (fieldType.IsValueType)
+							{
+								il.LoadLocal(result);
+								il.LoadValue(Constants.NotSoRandomPrime);
+								il.LoadArg_0();
+								il.LoadFieldAddress(field);
+								il.Constrained(fieldType);
+								il.CallVirtual<object>("GetHashCode");
+								il.Multiply();
+								il.Xor();
+								il.StoreLocal(result);
+							}
+							else if (fieldType.IsArray)
+							{
+								var elmType = fieldType.GetElementType();
+								il.LoadLocal(result);
+								il.LoadValue(Constants.NotSoRandomPrime);
+								il.LoadArg_0();
+								il.LoadField(field);
+								il.LoadLocal(result);
+								il.Call(typeof(Core.Extensions).GetMethod("CalculateCombinedHashcode", BindingFlags.Public | BindingFlags.Static)
+																					.MakeGenericMethod(elmType));
+								il.Multiply();
+								il.Xor();
+								il.StoreLocal(result);
+							}
+							else
+							{
+								il.LoadArg_0();
+								il.LoadField(field);
+								il.LoadNull();
+								il.CompareEqual();
+								il.StoreLocal_2();
+								il.LoadLocal_2();
+								lbl = il.DefineLabel();
+								il.BranchIfTrue_ShortForm(lbl);
+								il.LoadLocal(result);
+								il.LoadValue(Constants.NotSoRandomPrime);
+								il.LoadArg_0();
+								il.LoadField(field);
+								il.CallVirtual<object>("GetHashCode");
+								il.Multiply();
+								il.Xor();
+								il.StoreLocal(result);
+								il.MarkLabel(lbl);
+							}
+							break;
+						case TypeCode.String:
+							il.LoadArg_0();
+							il.LoadField(field);
+							il.LoadNull();
+							il.CompareEqual();
+							il.StoreLocal_2();
+							il.LoadLocal_2();
+							lbl = il.DefineLabel();
+							il.BranchIfTrue_ShortForm(lbl);
+							il.Nop();
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadField(field);
+							il.CallVirtual<object>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							il.MarkLabel(lbl);
+							break;
+						case TypeCode.UInt64:
+							il.LoadLocal(result);
+							il.LoadValue(Constants.NotSoRandomPrime);
+							il.LoadArg_0();
+							il.LoadFieldAddress(field);
+							il.Constrained(typeof(UInt64));
+							il.CallVirtual<object>("GetHashCode");
+							il.Multiply();
+							il.Xor();
+							il.StoreLocal(result);
+							break;
+						default:
+							throw new InvalidOperationException(String.Concat("Unable to produce hashcode for type: ",
+																																fieldType.GetReadableFullName()));
+					}
+				}
+				il.LoadLocal(result);
+				il.StoreLocal_1();
+				il.Branch(exit);
+				il.MarkLabel(exit);
+				il.LoadLocal_1();
+			});
+			return method;
+		}
+
+		/// <summary>
+		/// Specializes the base class' Equals method.
+		/// </summary>
+		/// <param name="equatables">the types to be implemented as IEquatable&lt;></param>
+		/// <param name="filtered">function that filters the class' fields from inclusion in equality</param>
+		/// <param name="specialize">function that specializes the equality for a particular field</param>
+		/// <returns>the emitted, specialized Equals method</returns>
+		public EmittedMethod SpecializeEquals(
+				IEnumerable<Type> equatables,
+				Func<EmittedField, bool> filtered,
+				Func<EmittedClass, EmittedField, ILGenerator, Label, bool> specialize)
+		{
+			var equatable = typeof(IEquatable<>).MakeGenericType(this.Builder);
+			this.AddInterfaceImplementation(equatable);
+
+			var specializedEquals = this.DefineMethod("Equals");
+			specializedEquals.ClearAttributes();
+			specializedEquals.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
+				MethodAttributes.Virtual | MethodAttributes.Final);
+			specializedEquals.ReturnType = TypeRef.FromType<bool>();
+			var other = specializedEquals.DefineParameter("other", this.Ref);
+
+			specializedEquals.ContributeInstructions((m, il) =>
+			{
+				il.DeclareLocal(typeof(bool));
+				var exitFalse = il.DefineLabel();
+				il.Nop();
+
+				var fields =
+					new List<EmittedField>(
+						this.Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
+				for (var i = 0; i < fields.Count; i++)
+				{
+					var field = fields[i];
+					if (specialize != null && specialize(this, field, il, exitFalse))
+					{
+						continue;
+					}
+					var fieldType = field.FieldType.Target;
+					if (fieldType.IsArray)
+					{
+						var elmType = fieldType.GetElementType();
+						LoadFieldsFromThisAndParam(il, field, other);
+						il.Call(typeof(Core.Extensions).GetMethod("EqualsOrItemsEqual", BindingFlags.Static | BindingFlags.Public)
+																			.MakeGenericMethod(elmType));
+					}
+					else if (fieldType.IsClass)
+					{
+						if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
+						{
+							// compare observable collections for member equality...
+							var genericArg = fieldType.GetGenericArguments()[0];
+							var etype = typeof(IEnumerable<>).MakeGenericType(genericArg);
+							var sequenceEquals = typeof(Enumerable).MatchGenericMethod("SequenceEqual",
+																																				BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), etype, etype);
+							LoadFieldsFromThisAndParam(il, field, other);
+							il.Call(sequenceEquals.MakeGenericMethod(genericArg));
+						}
+						else
+						{
+							var opEquality = fieldType.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
+							if (opEquality != null)
+							{
+								LoadFieldsFromThisAndParam(il, field, other);
+								il.Call(opEquality);
+							}
+							else
+							{
+								il.Call(typeof(EqualityComparer<>).MakeGenericType(fieldType)
+																									.GetMethod("get_Default", BindingFlags.Static | BindingFlags.Public));
+								LoadFieldsFromThisAndParam(il, field, other);
+								il.CallVirtual(typeof(IEqualityComparer<>).MakeGenericType(fieldType)
+																													.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance,
+																																		null,
+																																		new[] { fieldType, fieldType },
+																																		null
+																));
+							}
+						}
+					}
+					else
+					{
+						LoadFieldsFromThisAndParam(il, field, other);
+						il.CompareEquality(fieldType);
+					}
+					if (i < fields.Count - 1)
+					{
+						il.BranchIfFalse(exitFalse);
+					}
+				}
+				var exit = il.DefineLabel();
+				il.Branch(exit);
+				il.MarkLabel(exitFalse);
+				il.Load_I4_0();
+				il.MarkLabel(exit);
+				il.StoreLocal_0();
+				var fin = il.DefineLabel();
+				il.Branch(fin);
+				il.MarkLabel(fin);
+				il.LoadLocal_0();
+			});
+
+			var contributedEquals = new Action<EmittedMethodBase, ILGenerator>((m, il) =>
+			{
+				var exitFalse2 = il.DefineLabel();
+				var exit = il.DefineLabel();
+				il.DeclareLocal(typeof(bool));
+				il.Nop();
+				il.LoadArg_1();
+				il.IsInstance(Builder);
+				il.BranchIfFalse(exitFalse2);
+				il.LoadArg_0();
+				il.LoadArg_1();
+				il.CastClass(Builder);
+				il.Call(specializedEquals);
+				il.Branch(exit);
+				il.MarkLabel(exitFalse2);
+				il.LoadValue(false);
+				il.MarkLabel(exit);
+				il.StoreLocal_0();
+				var fin = il.DefineLabel();
+				il.Branch(fin);
+				il.MarkLabel(fin);
+				il.LoadLocal_0();
+			});
+
+			if (equatables != null)
+			{
+				foreach (var typ in equatables)
+				{
+					var equatableT = typeof(IEquatable<>).MakeGenericType(typ);
+					this.AddInterfaceImplementation(equatableT);
+					var equalsT = this.DefineMethod("Equals");
+					equalsT.ClearAttributes();
+					equalsT.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
+						MethodAttributes.Virtual | MethodAttributes.Final);
+					equalsT.ReturnType = TypeRef.FromType<bool>();
+					equalsT.DefineParameter("other", typ);
+					equalsT.ContributeInstructions(contributedEquals);
+				}
+			}
+
+			this.DefineOverrideMethod(typeof(Object).GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public, null,
+																														new[] { typeof(object) }, null))
+						.ContributeInstructions(contributedEquals);
+
+			return specializedEquals;
+		}
+
+		static void LoadFieldsFromThisAndParam(ILGenerator il, EmittedField field, EmittedParameter parm)
+		{
+			Contract.Requires<ArgumentNullException>(il != null);
+			Contract.Requires<ArgumentNullException>(field != null);
+			il.LoadArg_0();
+			il.LoadField(field);
+			il.LoadArg(parm);
+			il.LoadField(field);
 		}
 
 		[ContractInvariantMethod]

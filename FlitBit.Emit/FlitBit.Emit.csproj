@@ -89,8 +89,9 @@
     <CodeContractsEmitXMLDocs>True</CodeContractsEmitXMLDocs>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlitBit.Core, Version=2.9.1.0, Culture=neutral, PublicKeyToken=38f03d0878531ff3, processorArchitecture=MSIL">
-      <HintPath>..\packages\FlitBit.Core.2.9.1\lib\net40\FlitBit.Core.dll</HintPath>
+    <Reference Include="FlitBit.Core, Version=2.11.0.0, Culture=neutral, PublicKeyToken=38f03d0878531ff3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FlitBit.Core.2.11.0\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -109,6 +110,7 @@
       <Link>Properties\AssemblyInfo.corporate.cs</Link>
     </Compile>
     <Compile Include="ConstantValueRef.T.cs" />
+    <Compile Include="EmittedEvent.cs" />
     <Compile Include="EmittedAssembly.cs" />
     <Compile Include="EmittedClass.cs" />
     <Compile Include="EmittedConstructor.cs" />
@@ -140,6 +142,7 @@
     <Compile Include="RawPropertyRef.cs" />
     <Compile Include="RuntimeAssemblies.cs" />
     <Compile Include="RuntimeAssembliesConfigSection.cs" />
+    <Compile Include="ThisRef.cs" />
     <Compile Include="TypeRef.cs" />
   </ItemGroup>
   <ItemGroup>

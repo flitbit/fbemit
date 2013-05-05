@@ -101,9 +101,9 @@
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlitBit.Core, Version=2.9.2.0, Culture=neutral, PublicKeyToken=38f03d0878531ff3, processorArchitecture=MSIL">
+    <Reference Include="FlitBit.Core, Version=2.11.0.0, Culture=neutral, PublicKeyToken=38f03d0878531ff3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FlitBit.Core.2.9.2\lib\net40\FlitBit.Core.dll</HintPath>
+      <HintPath>..\..\packages\FlitBit.Core.2.11.0\lib\net40\FlitBit.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>

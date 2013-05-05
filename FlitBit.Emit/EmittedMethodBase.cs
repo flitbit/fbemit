@@ -168,9 +168,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			if ((from p in _parameters
-					where String.Equals(name, p.Name)
-					select p).SingleOrDefault() != null)
+			if (_parameters.Any(p => String.Equals(name, p.Name)))
 			{
 				throw new InvalidOperationException(String.Format(
 																												 @"Method already contains a parameter by the same name:
