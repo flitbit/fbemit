@@ -13,11 +13,11 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class RuntimeAssembliesConfigSection : ConfigurationSection
 	{
-		const string CDefaultDynamicAssemblyPrefix = "FlitBit.Dynamic";
+		private const string CDefaultDynamicAssemblyPrefix = "FlitBit.Dynamic";
 
-		const bool CDefaultWriteAssembliesOnExit = false;
-		const string PropertyNameDynamicAssemblyPrefix = "dynamicAssemblyPrefix";
-		const string PropertyNameWriteAssembliesOnExit = "writeAssembliesOnExit";
+		private const bool CDefaultWriteAssembliesOnExit = false;
+		private const string PropertyNameDynamicAssemblyPrefix = "dynamicAssemblyPrefix";
+		private const string PropertyNameWriteAssembliesOnExit = "writeAssembliesOnExit";
 
 		/// <summary>
 		///   Configuration section name for cache settings
@@ -52,7 +52,7 @@ namespace FlitBit.Emit
 			get
 			{
 				var config = ConfigurationManager.GetSection(
-																										 SectionName) as RuntimeAssembliesConfigSection;
+					SectionName) as RuntimeAssembliesConfigSection;
 				return config ?? new RuntimeAssembliesConfigSection();
 			}
 		}

@@ -16,9 +16,9 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedField : EmittedMember, IFieldRef
 	{
-		FieldAttributes _attributes;
-		FieldBuilder _builder;
-		Action<EmittedConstructor, ILGenerator> _init;
+		private FieldAttributes _attributes;
+		private FieldBuilder _builder;
+		private Action<EmittedConstructor, ILGenerator> _init;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -34,8 +34,8 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 			Contract.Requires<ArgumentNullException>(fieldType != null, "fieldType cannot be null");
 
-			this.FieldType = fieldType;
-			this.Attributes = FieldAttributes.Private;
+			FieldType = fieldType;
+			Attributes = FieldAttributes.Private;
 		}
 
 		/// <summary>
@@ -60,9 +60,9 @@ namespace FlitBit.Emit
 		{
 			get
 			{
-				return this._builder ?? (this._builder = this.TargetClass.Builder.DefineField(this.Name
-																																											, this.FieldType.Target
-																																											, this.Attributes));
+				return _builder ?? (_builder = TargetClass.Builder.DefineField(Name
+					, FieldType.Target
+					, Attributes));
 			}
 		}
 
@@ -74,19 +74,28 @@ namespace FlitBit.Emit
 		/// <summary>
 		///   Clears the field's attributes.
 		/// </summary>
-		public void ClearAttributes() { Attributes = default(FieldAttributes); }
+		public void ClearAttributes()
+		{
+			Attributes = default(FieldAttributes);
+		}
 
 		/// <summary>
 		///   Excludes the attributes given.
 		/// </summary>
 		/// <param name="attr">the attributes to exclude</param>
-		public void ExcludeAttributes(FieldAttributes attr) { Attributes &= (~attr); }
+		public void ExcludeAttributes(FieldAttributes attr)
+		{
+			Attributes &= (~attr);
+		}
 
 		/// <summary>
 		///   Includes the attributes given.
 		/// </summary>
 		/// <param name="attr">the attributes to include</param>
-		public void IncludeAttributes(FieldAttributes attr) { Attributes |= attr; }
+		public void IncludeAttributes(FieldAttributes attr)
+		{
+			Attributes |= attr;
+		}
 
 		/// <summary>
 		///   Assigns the field's initial value.
@@ -98,7 +107,7 @@ namespace FlitBit.Emit
 			Contract.Assert(_init == null, "Field has already been initialized.");
 			_init = (m, il) =>
 			{
-				if (!this.IsStatic)
+				if (!IsStatic)
 				{
 					il.LoadArg_0();
 				}
@@ -124,9 +133,9 @@ namespace FlitBit.Emit
 			// Access the builder to make sure it is declared on the underlying type...
 			if (_builder == null)
 			{
-				_builder = this.TargetClass.Builder.DefineField(this.Name
-																												, this.FieldType.Target
-																												, this.Attributes);
+				_builder = TargetClass.Builder.DefineField(Name
+					, FieldType.Target
+					, Attributes);
 			}
 		}
 
@@ -144,19 +153,28 @@ namespace FlitBit.Emit
 		///   Emits instructions to load the field's address.
 		/// </summary>
 		/// <param name="il">IL</param>
-		public void LoadAddress(ILGenerator il) { il.LoadFieldAddress(Builder); }
+		public void LoadAddress(ILGenerator il)
+		{
+			il.LoadFieldAddress(Builder);
+		}
 
 		/// <summary>
 		///   Emits instructions to load the field's value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void LoadValue(ILGenerator il) { il.LoadField(Builder); }
+		public void LoadValue(ILGenerator il)
+		{
+			il.LoadField(Builder);
+		}
 
 		/// <summary>
 		///   Emits instructions to store the field's value.
 		/// </summary>
 		/// <param name="il">IL</param>
-		public void StoreValue(ILGenerator il) { il.StoreField(Builder); }
+		public void StoreValue(ILGenerator il)
+		{
+			il.StoreField(Builder);
+		}
 
 		/// <summary>
 		///   Gets the field's target type.

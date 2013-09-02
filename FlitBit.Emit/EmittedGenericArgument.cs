@@ -19,8 +19,8 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedGenericArgument
 	{
-		readonly List<TypeRef> _interfaceConstraints = new List<TypeRef>();
-		TypeRef _baseTypeConstraint;
+		private readonly List<TypeRef> _interfaceConstraints = new List<TypeRef>();
+		private TypeRef _baseTypeConstraint;
 
 		/// <summary>
 		///   Gets the argument's attributes.
@@ -105,7 +105,7 @@ namespace FlitBit.Emit
 			if (_interfaceConstraints.Count > 0)
 			{
 				arg.SetInterfaceConstraints((from i in _interfaceConstraints
-																		select i.Target).ToArray());
+					select i.Target).ToArray());
 			}
 		}
 	}

@@ -22,13 +22,16 @@ namespace FlitBit.Emit
 		///   MethodAttributes for public interface implementations.
 		/// </summary>
 		public static readonly MethodAttributes PublicInterfaceImplementationAttributes = MethodAttributes.Public |
-			MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
+		                                                                                  MethodAttributes.HideBySig |
+		                                                                                  MethodAttributes.NewSlot |
+		                                                                                  MethodAttributes.Virtual |
+		                                                                                  MethodAttributes.Final;
 
-		readonly Type[] _parameterTypes;
+		private readonly Type[] _parameterTypes;
 
-		MethodInfo _baseMethod;
-		MethodBuilder _builder;
-		TypeRef _returnType;
+		private MethodInfo _baseMethod;
+		private MethodBuilder _builder;
+		private TypeRef _returnType;
 
 		/// <summary>
 		///   Creates a new instace.
@@ -36,7 +39,10 @@ namespace FlitBit.Emit
 		/// <param name="type">owning type</param>
 		/// <param name="name">the method's name</param>
 		public EmittedMethod(EmittedClass type, string name)
-			: base(type, name) { this.CallingConvention = CallingConventions.Standard | CallingConventions.HasThis; }
+			: base(type, name)
+		{
+			CallingConvention = CallingConventions.Standard | CallingConventions.HasThis;
+		}
 
 		/// <summary>
 		///   Creates a new instance based on the given method info.
@@ -44,7 +50,9 @@ namespace FlitBit.Emit
 		/// <param name="type">owning type</param>
 		/// <param name="method">method info describing the method to emit</param>
 		public EmittedMethod(EmittedClass type, MethodInfo method)
-			: this(type, method, false) { }
+			: this(type, method, false)
+		{
+		}
 
 		/// <summary>
 		///   Creates a new instance that overrides the given method.
@@ -64,38 +72,39 @@ namespace FlitBit.Emit
 			}
 			if (method.IsGenericMethod || method.IsGenericMethodDefinition)
 			{
-				var attributes = method.Attributes & ~(MethodAttributes.Abstract | MethodAttributes.VtableLayoutMask);
-				var parameters = method.GetParameters();
+				MethodAttributes attributes = method.Attributes & ~(MethodAttributes.Abstract | MethodAttributes.VtableLayoutMask);
+				ParameterInfo[] parameters = method.GetParameters();
 				_parameterTypes = ParameterHelper.GetParameterTypes(method, parameters);
 				_builder = type.Builder.DefineMethod(method.Name, attributes);
 
-				this.GenericArgumentTypes = method.GetGenericArguments();
-				var genericTypeParameters = GetGenericTypeParameters(_builder, method.GetGenericArguments());
+				GenericArgumentTypes = method.GetGenericArguments();
+				GenericTypeParameterBuilder[] genericTypeParameters = GetGenericTypeParameters(_builder,
+					method.GetGenericArguments());
 
 				ParameterHelper.SetUpParameterConstraints(_parameterTypes, genericTypeParameters);
 
-				var returnType = SetUpReturnType(method, _builder, genericTypeParameters);
-				this._returnType = new TypeRef(returnType);
+				Type returnType = SetUpReturnType(method, _builder, genericTypeParameters);
+				_returnType = new TypeRef(returnType);
 
-				var i = 0;
-				foreach (var p in ParameterHelper.SetUpParameters(_parameterTypes, parameters, _builder))
+				int i = 0;
+				foreach (ParameterBuilder p in ParameterHelper.SetUpParameters(_parameterTypes, parameters, _builder))
 				{
 					AddParameter(new EmittedParameter(p, _parameterTypes[i++]));
 				}
 			}
 			else
 			{
-				var attributes = method.Attributes & ~(MethodAttributes.Abstract | MethodAttributes.VtableLayoutMask);
-				var parameters = method.GetParameters();
+				MethodAttributes attributes = method.Attributes & ~(MethodAttributes.Abstract | MethodAttributes.VtableLayoutMask);
+				ParameterInfo[] parameters = method.GetParameters();
 				_parameterTypes = ParameterHelper.GetParameterTypes(method, parameters);
 
 				_builder = type.Builder.DefineMethod(method.Name, attributes);
 
-				var returnType = SetUpReturnType(method, _builder, null);
-				this._returnType = new TypeRef(returnType);
+				Type returnType = SetUpReturnType(method, _builder, null);
+				_returnType = new TypeRef(returnType);
 
-				var i = 0;
-				foreach (var p in ParameterHelper.SetUpParameters(_parameterTypes, parameters, _builder))
+				int i = 0;
+				foreach (ParameterBuilder p in ParameterHelper.SetUpParameters(_parameterTypes, parameters, _builder))
 				{
 					AddParameter(new EmittedParameter(p, _parameterTypes[i++]));
 				}
@@ -107,7 +116,7 @@ namespace FlitBit.Emit
 		/// </summary>
 		public override Type[] ParameterTypes
 		{
-			get { return this._parameterTypes ?? base.ParameterTypes; }
+			get { return _parameterTypes ?? base.ParameterTypes; }
 		}
 
 		/// <summary>
@@ -117,11 +126,11 @@ namespace FlitBit.Emit
 		{
 			get
 			{
-				return this._builder ?? (this._builder = this.TargetClass.Builder.DefineMethod(this.Name
-																																											, this.Attributes
-																																											, this.CallingConvention
-																																											, (this.ReturnType != null) ? this.ReturnType.Target : null
-																																											, this.ParameterTypes
+				return _builder ?? (_builder = TargetClass.Builder.DefineMethod(Name
+					, Attributes
+					, CallingConvention
+					, (ReturnType != null) ? ReturnType.Target : null
+					, ParameterTypes
 					));
 			}
 		}
@@ -156,16 +165,22 @@ namespace FlitBit.Emit
 		///   Emits a instructions to call the method.
 		/// </summary>
 		/// <param name="il"></param>
-		public override void EmitCall(ILGenerator il) { il.Call(Builder); }
+		public override void EmitCall(ILGenerator il)
+		{
+			il.Call(Builder);
+		}
 
-		internal void CheckOverrideOnCompile(MethodInfo methodInfo) { _baseMethod = methodInfo; }
+		internal void CheckOverrideOnCompile(MethodInfo methodInfo)
+		{
+			_baseMethod = methodInfo;
+		}
 
 		/// <summary>
 		///   Compiles the method.
 		/// </summary>
 		protected internal override void OnCompile()
 		{
-			var il = SetILGenerator(Builder.GetILGenerator());
+			ILGenerator il = SetILGenerator(Builder.GetILGenerator());
 			try
 			{
 				CompileParameters(Builder);
@@ -176,7 +191,7 @@ namespace FlitBit.Emit
 				{
 					if (_baseMethod.IsAbstract)
 					{
-						this.TargetClass.Builder.DefineMethodOverride(Builder, _baseMethod);
+						TargetClass.Builder.DefineMethodOverride(Builder, _baseMethod);
 					}
 				}
 				il.Return();
@@ -193,14 +208,14 @@ namespace FlitBit.Emit
 		/// <param name="builder"></param>
 		/// <param name="genericArguments"></param>
 		/// <returns></returns>
-		static GenericTypeParameterBuilder[] GetGenericTypeParameters(MethodBuilder builder,
+		private static GenericTypeParameterBuilder[] GetGenericTypeParameters(MethodBuilder builder,
 			IEnumerable<Type> genericArguments)
 		{
 			return builder.DefineGenericParameters((from n in genericArguments
-																							select n.Name).ToArray());
+				select n.Name).ToArray());
 		}
 
-		static Type SetUpReturnType(MethodInfo method, MethodBuilder builder,
+		private static Type SetUpReturnType(MethodInfo method, MethodBuilder builder,
 			IEnumerable<GenericTypeParameterBuilder> genericTypeParameters)
 		{
 			Type result;

@@ -17,7 +17,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedModule
 	{
-		readonly Dictionary<string, EmittedClass> _classes = new Dictionary<string, EmittedClass>();
+		private readonly Dictionary<string, EmittedClass> _classes = new Dictionary<string, EmittedClass>();
 
 		/// <summary>
 		///   Creates a new instance.
@@ -31,11 +31,11 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			this.Assembly = assembly;
-			this.Name = name;
-			this.Namespace = @namespace ?? String.Empty;
+			Assembly = assembly;
+			Name = name;
+			Namespace = @namespace ?? String.Empty;
 #if DEBUG
-			this.Builder = this.Assembly.Builder.DefineDynamicModule(name, name + ".dll", true);
+			Builder = Assembly.Builder.DefineDynamicModule(name, name + ".dll", true);
 #else
 			this.Builder = this.Assembly.Builder.DefineDynamicModule(name, name + ".dll", false);
 #endif
@@ -74,7 +74,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(!IsCompiled, "module already compiled");
 
-			foreach (var c in this._classes.Values)
+			foreach (EmittedClass c in _classes.Values)
 			{
 				// Classes may have been individually compiled.
 				if (!c.IsCompiled)
@@ -82,8 +82,8 @@ namespace FlitBit.Emit
 					c.Compile();
 				}
 			}
-			this.IsCompiled = true;
-			return this.Builder;
+			IsCompiled = true;
+			return Builder;
 		}
 
 		/// <summary>
@@ -131,14 +131,14 @@ namespace FlitBit.Emit
 		internal void Save()
 		{
 			Contract.Requires(Assembly != null);
-			if (!this.Assembly.IsCompiled)
+			if (!Assembly.IsCompiled)
 			{
-				this.Assembly.Compile();
+				Assembly.Compile();
 			}
-			this.Assembly.Save(this);
+			Assembly.Save(this);
 		}
 
-		void CheckClassName(string name)
+		private void CheckClassName(string name)
 		{
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
@@ -146,8 +146,8 @@ namespace FlitBit.Emit
 			if (_classes.ContainsKey(name))
 			{
 				throw new InvalidOperationException(String.Concat(
-																												 "Unable to generate duplicate class. The class name is already in use: module = ",
-																												this.Name, ", class = ", name)
+					"Unable to generate duplicate class. The class name is already in use: module = ",
+					Name, ", class = ", name)
 					);
 			}
 		}

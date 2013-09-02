@@ -13,7 +13,7 @@ namespace FlitBit.Emit
 {
 	internal class RawPropertyRef : IPropertyRef
 	{
-		readonly PropertyInfo _prop;
+		private readonly PropertyInfo _prop;
 
 		public RawPropertyRef(PropertyInfo prop)
 		{
@@ -29,9 +29,15 @@ namespace FlitBit.Emit
 			get { return _prop.Name; }
 		}
 
-		public PropertyInfo GetPropertyInfo() { return _prop; }
+		public PropertyInfo GetPropertyInfo()
+		{
+			return _prop;
+		}
 
-		public void LoadAddress(ILGenerator il) { throw new NotImplementedException(); }
+		public void LoadAddress(ILGenerator il)
+		{
+			throw new NotImplementedException();
+		}
 
 		public void LoadValue(ILGenerator il)
 		{

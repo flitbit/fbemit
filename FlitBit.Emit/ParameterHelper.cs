@@ -30,7 +30,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(method != null);
 			Contract.Requires<ArgumentNullException>(parameters != null);
 
-			var result = Type.EmptyTypes;
+			Type[] result = Type.EmptyTypes;
 			if (parameters.Length > 0)
 			{
 				result = CreateParametersList(parameters);
@@ -57,7 +57,7 @@ namespace FlitBit.Emit
 			GenericTypeParameterBuilder[] genericTypeParameterBuilders)
 		{
 			Contract.Requires<ArgumentNullException>(parameterTypes != null);
-			foreach (var parameter in parameterTypes)
+			foreach (Type parameter in parameterTypes)
 			{
 				if (parameter.IsGenericParameter)
 				{
@@ -86,20 +86,22 @@ namespace FlitBit.Emit
 			return new ParameterBuilder[0];
 		}
 
-		static void AddGenericParameterConstraints(IEnumerable<GenericTypeParameterBuilder> genericTypeParameterBuilders,
+		private static void AddGenericParameterConstraints(
+			IEnumerable<GenericTypeParameterBuilder> genericTypeParameterBuilders,
 			Type parameter)
 		{
 			Contract.Requires<ArgumentNullException>(parameter != null);
 			Contract.Requires<ArgumentException>(parameter.IsGenericParameter);
 			Contract.Requires<ArgumentNullException>(genericTypeParameterBuilders != null);
 
-			var constraints = parameter.GetGenericParameterConstraints();
-			var genericTypeParameterBuilder = genericTypeParameterBuilders.First(x => x.Name == parameter.Name);
+			Type[] constraints = parameter.GetGenericParameterConstraints();
+			GenericTypeParameterBuilder genericTypeParameterBuilder =
+				genericTypeParameterBuilders.First(x => x.Name == parameter.Name);
 
 			genericTypeParameterBuilder.SetGenericParameterAttributes(parameter.GenericParameterAttributes);
 
 			var interfaceConstraints = new List<Type>();
-			foreach (var constraint in constraints)
+			foreach (Type constraint in constraints)
 			{
 				if (constraint.IsInterface)
 				{
@@ -113,19 +115,19 @@ namespace FlitBit.Emit
 			genericTypeParameterBuilder.SetInterfaceConstraints(interfaceConstraints.ToArray());
 		}
 
-		static Type[] CreateParametersList(IEnumerable<ParameterInfo> parameters)
+		private static Type[] CreateParametersList(IEnumerable<ParameterInfo> parameters)
 		{
 			Contract.Requires<ArgumentNullException>(parameters != null);
 			return (from p in parameters
-							select p.ParameterType).ToArray();
+				select p.ParameterType).ToArray();
 		}
 
-		static ParameterBuilder[] DefineParameters(IEnumerable<ParameterInfo> parameters, MethodBuilder method)
+		private static ParameterBuilder[] DefineParameters(IEnumerable<ParameterInfo> parameters, MethodBuilder method)
 		{
 			Contract.Requires<ArgumentNullException>(parameters != null);
 			Contract.Requires<ArgumentNullException>(method != null);
 
-			var i = (method.IsStatic) ? 0 : 1;
+			int i = (method.IsStatic) ? 0 : 1;
 			return
 				(from p in parameters let attributes = p.Attributes select method.DefineParameter(i++, p.Attributes, p.Name))
 					.ToArray();

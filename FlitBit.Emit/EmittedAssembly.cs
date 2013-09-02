@@ -18,7 +18,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedAssembly
 	{
-		Dictionary<string, EmittedModule> _modules;
+		private Dictionary<string, EmittedModule> _modules;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -26,7 +26,9 @@ namespace FlitBit.Emit
 		/// <param name="name">the assembly's name</param>
 		/// <param name="rootNamespace">the assembly's root namespace</param>
 		public EmittedAssembly(string name, string rootNamespace)
-			: this(name, rootNamespace, new Version(1, 0, 0, 0), new CultureInfo("en"), null, null) { }
+			: this(name, rootNamespace, new Version(1, 0, 0, 0), new CultureInfo("en"), null, null)
+		{
+		}
 
 		/// <summary>
 		///   Creates a new instance
@@ -36,7 +38,9 @@ namespace FlitBit.Emit
 		/// <param name="version">the assembly's version</param>
 		/// <param name="culture">the assembly's culture</param>
 		public EmittedAssembly(string name, string rootNamespace, Version version, CultureInfo culture)
-			: this(name, rootNamespace, version, culture, null, null) { }
+			: this(name, rootNamespace, version, culture, null, null)
+		{
+		}
 
 		/// <summary>
 		///   Creates a new instance
@@ -106,15 +110,15 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<InvalidOperationException>(!IsCompiled, "already compiled");
 
-			foreach (var m in this._modules.Values)
+			foreach (EmittedModule m in _modules.Values)
 			{
 				if (!m.IsCompiled)
 				{
 					m.Compile();
 				}
 			}
-			this.IsCompiled = true;
-			return this.Builder;
+			IsCompiled = true;
+			return Builder;
 		}
 
 		/// <summary>
@@ -122,7 +126,10 @@ namespace FlitBit.Emit
 		/// </summary>
 		/// <param name="name">the class' name</param>
 		/// <returns>the emitted class</returns>
-		public EmittedClass DefineClass(string name) { return BaseModule.DefineClass(name); }
+		public EmittedClass DefineClass(string name)
+		{
+			return BaseModule.DefineClass(name);
+		}
 
 		/// <summary>
 		///   Defines a class.
@@ -135,7 +142,10 @@ namespace FlitBit.Emit
 		public EmittedClass DefineClass(string name,
 			TypeAttributes attributes,
 			Type supertype,
-			Type[] interfaces) { return BaseModule.DefineClass(name, attributes, supertype, interfaces); }
+			Type[] interfaces)
+		{
+			return BaseModule.DefineClass(name, attributes, supertype, interfaces);
+		}
 
 		/// <summary>
 		///   Defines a new module in the assembly.
@@ -168,7 +178,7 @@ namespace FlitBit.Emit
 			return Builder;
 		}
 
-		void CheckModuleName(string name)
+		private void CheckModuleName(string name)
 		{
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
@@ -176,20 +186,20 @@ namespace FlitBit.Emit
 			if (_modules.ContainsKey(name))
 			{
 				throw new InvalidOperationException(String.Concat(
-																												 "Unable to generate duplicate class. The class name is already in use: module = ",
-																												this.Name, ", class = ", name)
+					"Unable to generate duplicate class. The class name is already in use: module = ",
+					Name, ", class = ", name)
 					);
 			}
 		}
 
-		void FinishConstruction(AssemblyName name, string rootNamespace)
+		private void FinishConstruction(AssemblyName name, string rootNamespace)
 		{
-			this._modules = new Dictionary<string, EmittedModule>();
-			this.RootNamespace = rootNamespace ?? name.Name;
-			this.Name = name;
-			this.Builder = AppDomain.CurrentDomain.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndSave);
-			this.BaseModule = new EmittedModule(this, name.Name, this.RootNamespace);
-			this._modules.Add(BaseModule.Name, BaseModule);
+			_modules = new Dictionary<string, EmittedModule>();
+			RootNamespace = rootNamespace ?? name.Name;
+			Name = name;
+			Builder = AppDomain.CurrentDomain.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndSave);
+			BaseModule = new EmittedModule(this, name.Name, RootNamespace);
+			_modules.Add(BaseModule.Name, BaseModule);
 		}
 	}
 }

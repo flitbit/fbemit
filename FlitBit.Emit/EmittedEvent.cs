@@ -16,7 +16,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedEvent : EmittedMember
 	{
-		EventBuilder _builder;
+		private EventBuilder _builder;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -30,8 +30,8 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(eventType != null);
 
-			this.EventType = TypeRef.FromType(eventType);
-			this.IsStatic = isStatic;
+			EventType = TypeRef.FromType(eventType);
+			IsStatic = isStatic;
 		}
 
 		/// <summary>
@@ -48,10 +48,9 @@ namespace FlitBit.Emit
 			{
 				if (_builder == null)
 				{
-					this._builder = this.TargetClass.Builder.DefineEvent(this.Name
-																															, this.Attributes
-																															, this.EventType.Target);
-
+					_builder = TargetClass.Builder.DefineEvent(Name
+						, Attributes
+						, EventType.Target);
 				}
 				return _builder;
 			}
@@ -61,7 +60,7 @@ namespace FlitBit.Emit
 		///   Gets the event's type.
 		/// </summary>
 		public TypeRef EventType { get; private set; }
-		
+
 		/// <summary>
 		///   Compiles the property.
 		/// </summary>

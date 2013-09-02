@@ -9,7 +9,7 @@
 		<AssemblyOriginatorKeyFile Condition="Exists('$(StrongNameSigningKeyFile)')">$(StrongNameSigningKeyFile)</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
-    <Compile Condition="'$(SignAssembly)' != 'true'" Include="Properties\AssemblyInfo.internals.cs" />
-    <Compile Condition="'$(SignAssembly)' == 'true'" Include="Properties\AssemblyInfo.internals.signed.cs" />
+    <Compile Condition="'$(SignAssembly)' != 'true' AND Exists('Properties\AssemblyInfo.internals.cs')" Include="Properties\AssemblyInfo.internals.cs" />
+    <Compile Condition="'$(SignAssembly)' == 'true' AND Exists('Properties\AssemblyInfo.internals.signed.cs')" Include="Properties\AssemblyInfo.internals.signed.cs" />
 	</ItemGroup>
 </Project>

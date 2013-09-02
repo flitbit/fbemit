@@ -26,7 +26,7 @@ namespace FlitBit.Emit
 		/// <returns>the type's element type</returns>
 		public static Type FindElementType(this Type type)
 		{
-			var ienum = FindEnumerableElementType(type);
+			Type ienum = FindEnumerableElementType(type);
 			if (ienum == null)
 			{
 				return type;
@@ -43,38 +43,38 @@ namespace FlitBit.Emit
 		/// </returns>
 		public static Type FindEnumerableElementType(this Type type)
 		{
-			if (type == null || type == typeof(string))
+			if (type == null || type == typeof (string))
 			{
 				return null;
 			}
 			if (type.IsArray)
 			{
-				return typeof(IEnumerable<>).MakeGenericType(type.GetElementType());
+				return typeof (IEnumerable<>).MakeGenericType(type.GetElementType());
 			}
 			if (type.IsGenericType)
 			{
-				foreach (var arg in type.GetGenericArguments())
+				foreach (Type arg in type.GetGenericArguments())
 				{
-					var ienum = typeof(IEnumerable<>).MakeGenericType(arg);
+					Type ienum = typeof (IEnumerable<>).MakeGenericType(arg);
 					if (ienum.IsAssignableFrom(type))
 					{
 						return ienum;
 					}
 				}
 			}
-			var ifaces = type.GetInterfaces();
+			Type[] ifaces = type.GetInterfaces();
 			if (ifaces.Length > 0)
 			{
-				foreach (var iface in ifaces)
+				foreach (Type iface in ifaces)
 				{
-					var ienum = FindEnumerableElementType(iface);
+					Type ienum = FindEnumerableElementType(iface);
 					if (ienum != null)
 					{
 						return ienum;
 					}
 				}
 			}
-			if (type.BaseType != null && type.BaseType != typeof(object))
+			if (type.BaseType != null && type.BaseType != typeof (object))
 			{
 				return FindEnumerableElementType(type.BaseType);
 			}
@@ -97,9 +97,9 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<string>() != null);
 
 			return String.Concat(type.Namespace
-													, ".emitted"
-													, MangleTypeName(type).Substring(type.Namespace.Length).Replace("+", "-")
-													, suffix ?? String.Empty
+				, ".emitted"
+				, MangleTypeName(type).Substring(type.Namespace.Length).Replace("+", "-")
+				, suffix ?? String.Empty
 				);
 		}
 
@@ -121,11 +121,11 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 			Contract.Requires<ArgumentNullException>(genericArgumentCount > 0);
 			return (from m in type.GetMethods(binding)
-							where String.Equals(name, m.Name, StringComparison.Ordinal)
-								&& m.IsGenericMethodDefinition
-								&& m.GetGenericArguments().Count() == genericArgumentCount
-								&& m.GetParameters().Count() == parameterCount
-							select m).SingleOrDefault();
+				where String.Equals(name, m.Name, StringComparison.Ordinal)
+				      && m.IsGenericMethodDefinition
+				      && m.GetGenericArguments().Count() == genericArgumentCount
+				      && m.GetParameters().Count() == parameterCount
+				select m).SingleOrDefault();
 		}
 
 		/// <summary>
@@ -144,17 +144,17 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 			Contract.Requires<ArgumentNullException>(genericArgumentCount > 0);
 			var candidates = from m in type.GetMethods()
-											where String.Equals(name, m.Name, StringComparison.Ordinal)
-												&& m.IsGenericMethodDefinition
-											select new
-											{
-												Method = m,
-												GenericArgumentCount = m.GetGenericArguments().Count(),
-												ParameterCount = m.GetParameters().Count()
-											};
+				where String.Equals(name, m.Name, StringComparison.Ordinal)
+				      && m.IsGenericMethodDefinition
+				select new
+				{
+					Method = m,
+					GenericArgumentCount = m.GetGenericArguments().Count(),
+					ParameterCount = m.GetParameters().Count()
+				};
 			return (from c in candidates
-							where c.ParameterCount == parameterCount && c.GenericArgumentCount == genericArgumentCount
-							select c.Method).SingleOrDefault();
+				where c.ParameterCount == parameterCount && c.GenericArgumentCount == genericArgumentCount
+				select c.Method).SingleOrDefault();
 		}
 
 		/// <summary>
@@ -168,8 +168,8 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties()
-						where p.CanRead && p.CanWrite
-						select p;
+				where p.CanRead && p.CanWrite
+				select p;
 		}
 
 		/// <summary>
@@ -183,8 +183,8 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties()
-						where p.CanRead
-						select p;
+				where p.CanRead
+				select p;
 		}
 
 		/// <summary>
@@ -199,8 +199,8 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties(binding)
-						where p.CanRead
-						select p;
+				where p.CanRead
+				select p;
 		}
 
 		/// <summary>
@@ -215,11 +215,11 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			var results = new List<PropertyInfo>();
-			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
+			foreach (Type t in type.GetTypeHierarchyInDeclarationOrder())
 			{
 				results.AddRange(from p in t.GetProperties(binding)
-												where p.CanRead && p.GetGetMethod() != null
-												select p);
+					where p.CanRead && p.GetGetMethod() != null
+					select p);
 			}
 			return results;
 		}
@@ -239,12 +239,12 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			var results = new List<PropertyInfo>();
-			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
+			foreach (Type t in type.GetTypeHierarchyInDeclarationOrder())
 			{
 				results.AddRange(from p in t.GetProperties(binding)
-												where p.CanRead && p.GetGetMethod() != null
-													&& p.IsDefined(typeof(TAttr), true)
-												select p);
+					where p.CanRead && p.GetGetMethod() != null
+					      && p.IsDefined(typeof (TAttr), true)
+					select p);
 			}
 			return results;
 		}
@@ -260,7 +260,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(type != null);
 			Contract.Requires<ArgumentNullException>(propertyName != null);
 
-			var p = type.GetProperty(propertyName);
+			PropertyInfo p = type.GetProperty(propertyName);
 			return (p != null && p.CanRead) ? p : null;
 		}
 
@@ -280,9 +280,9 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(assignableFromType != null);
 
 			return (from p in GetReadableProperties(type, binding)
-							where p.Name == propertyName
-								&& p.PropertyType.IsAssignableFrom(assignableFromType)
-							select p).FirstOrDefault();
+				where p.Name == propertyName
+				      && p.PropertyType.IsAssignableFrom(assignableFromType)
+				select p).FirstOrDefault();
 		}
 
 		/// <summary>
@@ -293,7 +293,7 @@ namespace FlitBit.Emit
 		public static IEnumerable<Type> GetTypeHierarchyInDeclarationOrder(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
-			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
+			Contract.Ensures(Contract.Result<IEnumerable<Type>>() != null);
 
 			if (type.BaseType == null)
 			{
@@ -316,8 +316,8 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties()
-						where p.CanWrite && p.GetSetMethod() != null
-						select p;
+				where p.CanWrite && p.GetSetMethod() != null
+				select p;
 		}
 
 		/// <summary>
@@ -332,8 +332,8 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			return from p in type.GetProperties(binding)
-						where p.CanWrite && p.GetSetMethod() != null
-						select p;
+				where p.CanWrite && p.GetSetMethod() != null
+				select p;
 		}
 
 		/// <summary>
@@ -348,11 +348,11 @@ namespace FlitBit.Emit
 			Contract.Ensures(Contract.Result<IEnumerable<PropertyInfo>>() != null);
 
 			var results = new List<PropertyInfo>();
-			foreach (var t in type.GetTypeHierarchyInDeclarationOrder())
+			foreach (Type t in type.GetTypeHierarchyInDeclarationOrder())
 			{
 				results.AddRange(from p in t.GetProperties(binding)
-												where p.CanWrite && p.GetSetMethod() != null
-												select p);
+					where p.CanWrite && p.GetSetMethod() != null
+					select p);
 			}
 			return results;
 		}
@@ -373,9 +373,9 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(assignableFromType != null);
 
 			return (from p in GetWritableProperties(type, binding)
-							where p.Name == propertyName
-								&& p.PropertyType.IsAssignableFrom(assignableFromType)
-							select p).FirstOrDefault();
+				where p.Name == propertyName
+				      && p.PropertyType.IsAssignableFrom(assignableFromType)
+				select p).FirstOrDefault();
 		}
 
 		/// <summary>
@@ -394,9 +394,9 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(assignableFromType != null);
 
 			return (from p in GetWritablePropertiesFromHierarchy(type, binding)
-							where p.Name == propertyName
-								&& p.PropertyType.IsAssignableFrom(assignableFromType)
-							select p).FirstOrDefault();
+				where p.Name == propertyName
+				      && p.PropertyType.IsAssignableFrom(assignableFromType)
+				select p).FirstOrDefault();
 		}
 
 		/// <summary>
@@ -410,7 +410,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(type != null);
 			Contract.Requires<ArgumentNullException>(propertyName != null);
 
-			var p = type.GetProperty(propertyName);
+			PropertyInfo p = type.GetProperty(propertyName);
 			return (p != null && p.CanWrite && p.GetSetMethod() != null) ? p : null;
 		}
 
@@ -426,15 +426,15 @@ namespace FlitBit.Emit
 		public static bool IsAnonymousType(this Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
-			var name = type.Name;
+			string name = type.Name;
 			if (name.Length < 3)
 			{
 				return false;
 			}
 			return name[0] == '<'
-				&& name[1] == '>'
-				&& name.IndexOf("AnonymousType", StringComparison.Ordinal) > 0
-				&& type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
+			       && name[1] == '>'
+			       && name.IndexOf("AnonymousType", StringComparison.Ordinal) > 0
+			       && type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Any();
 		}
 
 		/// <summary>
@@ -479,17 +479,17 @@ namespace FlitBit.Emit
 				return type.GetInterfaces().Where(i => i.IsGenericType).Any(intf => intf.GetGenericTypeDefinition() == generic);
 			}
 
-			var t = type;
+			Type t = type;
 			while (t != null)
 			{
-				var gtd = t.GetGenericTypeDefinition();
+				Type gtd = t.GetGenericTypeDefinition();
 				if (gtd == generic)
 				{
 					return true;
 				}
 
 				// Check base types...
-				var b = gtd.BaseType;
+				Type b = gtd.BaseType;
 				while (b != null)
 				{
 					if (b == generic)
@@ -514,15 +514,15 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(type != null);
 			Contract.Ensures(Contract.Result<string>() != null);
 
-			var tt = (type.IsArray) ? type.GetElementType() : type;
-			var simpleName = tt.Name;
+			Type tt = (type.IsArray) ? type.GetElementType() : type;
+			string simpleName = tt.Name;
 			if (simpleName.Contains("`"))
 			{
 				simpleName = simpleName.Substring(0, simpleName.IndexOf("`", StringComparison.Ordinal));
 
-				var args = tt.GetGenericArguments();
+				Type[] args = tt.GetGenericArguments();
 				simpleName = String.Concat(simpleName, '\u2014');
-				for (var i = 0; i < args.Length; i++)
+				for (int i = 0; i < args.Length; i++)
 				{
 					simpleName = i == 0
 						? String.Concat(simpleName, i, MangleTypeNameWithoutNamespace(args[i]))
@@ -544,14 +544,14 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(type != null);
 			Contract.Ensures(Contract.Result<string>() != null);
 
-			var tt = (type.IsArray) ? type.GetElementType() : type;
-			var simpleName = tt.Name;
+			Type tt = (type.IsArray) ? type.GetElementType() : type;
+			string simpleName = tt.Name;
 			if (simpleName.Contains("`"))
 			{
 				simpleName = simpleName.Substring(0, simpleName.IndexOf("`", StringComparison.Ordinal));
-				var args = tt.GetGenericArguments();
+				Type[] args = tt.GetGenericArguments();
 				simpleName = String.Concat(simpleName, '\u2014');
-				for (var i = 0; i < args.Length; i++)
+				for (int i = 0; i < args.Length; i++)
 				{
 					simpleName = i == 0
 						? String.Concat(simpleName, i, MangleTypeNameWithoutNamespace(args[i]))
@@ -574,7 +574,7 @@ namespace FlitBit.Emit
 			int genericArgumentCount, Type returnType, params Type[] parameterTypes)
 		{
 			return MatchGenericMethod(type, name, BindingFlags.Instance | BindingFlags.Public, genericArgumentCount, returnType,
-																parameterTypes);
+				parameterTypes);
 		}
 
 		/// <summary>
@@ -594,22 +594,22 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 			Contract.Requires<ArgumentNullException>(genericArgumentCount > 0);
-			var candidates = from m in type.GetMethods(binding)
-											where String.Equals(name, m.Name, StringComparison.Ordinal)
-												&& m.IsGenericMethodDefinition
-												&& m.GetGenericArguments().Count() == genericArgumentCount
-												&& m.GetParameters().Count() == parameterTypes.Length
-											select m;
-			var ub = parameterTypes.Length;
-			foreach (var candidate in candidates)
+			IEnumerable<MethodInfo> candidates = from m in type.GetMethods(binding)
+				where String.Equals(name, m.Name, StringComparison.Ordinal)
+				      && m.IsGenericMethodDefinition
+				      && m.GetGenericArguments().Count() == genericArgumentCount
+				      && m.GetParameters().Count() == parameterTypes.Length
+				select m;
+			int ub = parameterTypes.Length;
+			foreach (MethodInfo candidate in candidates)
 			{
 				if (IsParameterTypeCompatible(candidate.ReturnType, returnType))
 				{
-					var ptypes = candidate.GetParameters();
-					var i = 0;
+					ParameterInfo[] ptypes = candidate.GetParameters();
+					int i = 0;
 					for (; i < ub; i++)
 					{
-						var p = ptypes[i].ParameterType;
+						Type p = ptypes[i].ParameterType;
 						if (!IsParameterTypeCompatible(p, parameterTypes[i]))
 						{
 							break;
@@ -624,7 +624,7 @@ namespace FlitBit.Emit
 			return null;
 		}
 
-		static bool IsParameterTypeCompatible(Type target, Type candidate)
+		private static bool IsParameterTypeCompatible(Type target, Type candidate)
 		{
 			if (target == candidate || target.IsAssignableFrom(candidate))
 			{
@@ -632,7 +632,7 @@ namespace FlitBit.Emit
 			}
 			if (target.IsGenericParameter)
 			{
-				var constraints = target.GetGenericParameterConstraints();
+				Type[] constraints = target.GetGenericParameterConstraints();
 				// Ensure it is assignable as expected by the constraints...
 				if (constraints.All(constraint => constraint.IsAssignableFrom(candidate)))
 				{
@@ -641,14 +641,14 @@ namespace FlitBit.Emit
 						if (target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
 						{
 							if (!candidate.IsClass ||
-								target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)
-									&& candidate.GetConstructor(Type.EmptyTypes) == null)
+							    target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)
+							    && candidate.GetConstructor(Type.EmptyTypes) == null)
 							{
 								return false;
 							}
 						}
 						if (target.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint)
-							&& !candidate.IsValueType)
+						    && !candidate.IsValueType)
 						{
 							return false;
 						}
@@ -658,14 +658,14 @@ namespace FlitBit.Emit
 			}
 			if (target.IsGenericType && candidate.IsGenericType)
 			{
-				var targetDef = target.GetGenericTypeDefinition();
-				var candidateDef = candidate.GetGenericTypeDefinition();
+				Type targetDef = target.GetGenericTypeDefinition();
+				Type candidateDef = candidate.GetGenericTypeDefinition();
 				return (targetDef == candidateDef);
 			}
 			if (target.IsArray && candidate.IsArray && target.GetArrayRank() == candidate.GetArrayRank())
 			{
-				var targetElm = target.GetElementType();
-				var candidateElm = candidate.GetElementType();
+				Type targetElm = target.GetElementType();
+				Type candidateElm = candidate.GetElementType();
 				return IsParameterTypeCompatible(targetElm, candidateElm);
 			}
 			return false;

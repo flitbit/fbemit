@@ -13,7 +13,7 @@ namespace FlitBit.Emit
 {
 	internal class RawFieldRef : IFieldRef
 	{
-		readonly FieldInfo _field;
+		private readonly FieldInfo _field;
 
 		public RawFieldRef(FieldInfo field)
 		{

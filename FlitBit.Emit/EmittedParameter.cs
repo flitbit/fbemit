@@ -16,7 +16,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedParameter : IValueRef
 	{
-		ParameterBuilder _builder;
+		private ParameterBuilder _builder;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -31,11 +31,11 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			this.Method = method;
-			this.Index = index;
-			this.Name = name;
-			this.ParameterType = type;
-			this.Attributes = ParameterAttributes.None;
+			Method = method;
+			Index = index;
+			Name = name;
+			ParameterType = type;
+			Attributes = ParameterAttributes.None;
 		}
 
 		/// <summary>
@@ -46,9 +46,9 @@ namespace FlitBit.Emit
 		internal EmittedParameter(ParameterBuilder builder, Type type)
 		{
 			_builder = builder;
-			this.Name = _builder.Name;
-			this.ParameterType = new TypeRef(type);
-			this.Attributes = (ParameterAttributes) _builder.Attributes;
+			Name = _builder.Name;
+			ParameterType = new TypeRef(type);
+			Attributes = (ParameterAttributes) _builder.Attributes;
 		}
 
 		/// <summary>
@@ -82,19 +82,28 @@ namespace FlitBit.Emit
 		/// <summary>
 		///   Clears the parameter's attributes.
 		/// </summary>
-		public void ClearAttributes() { Attributes = 0; }
+		public void ClearAttributes()
+		{
+			Attributes = 0;
+		}
 
 		/// <summary>
 		///   Excludes the attributes given.
 		/// </summary>
 		/// <param name="attr">attributes to be excluded</param>
-		public void ExcludeAttributes(ParameterAttributes attr) { Attributes &= (~attr); }
+		public void ExcludeAttributes(ParameterAttributes attr)
+		{
+			Attributes &= (~attr);
+		}
 
 		/// <summary>
 		///   Includes the attributes given.
 		/// </summary>
 		/// <param name="attr">attributes to be encluded</param>
-		public void IncludeAttributes(ParameterAttributes attr) { Attributes |= attr; }
+		public void IncludeAttributes(ParameterAttributes attr)
+		{
+			Attributes |= attr;
+		}
 
 		/// <summary>
 		///   Compiles the parameter.
@@ -104,8 +113,8 @@ namespace FlitBit.Emit
 		{
 			if (_builder == null)
 			{
-				var ofs = (m.IsStatic ? 0 : 1);
-				_builder = m.DefineParameter(this.Index + ofs, this.Attributes, this.Name);
+				int ofs = (m.IsStatic ? 0 : 1);
+				_builder = m.DefineParameter(Index + ofs, Attributes, Name);
 			}
 		}
 
@@ -113,8 +122,8 @@ namespace FlitBit.Emit
 		{
 			if (_builder == null)
 			{
-				var ofs = (c.IsStatic ? 0 : 1);
-				_builder = c.DefineParameter(this.Index + ofs, this.Attributes, this.Name);
+				int ofs = (c.IsStatic ? 0 : 1);
+				_builder = c.DefineParameter(Index + ofs, Attributes, Name);
 			}
 		}
 
@@ -139,7 +148,7 @@ namespace FlitBit.Emit
 		/// <param name="il"></param>
 		public void LoadAddress(ILGenerator il)
 		{
-			var idx = (this.Method.IsStatic) ? Index : Index + 1;
+			int idx = (Method.IsStatic) ? Index : Index + 1;
 			il.LoadArgAddress(idx);
 		}
 
@@ -149,7 +158,7 @@ namespace FlitBit.Emit
 		/// <param name="il"></param>
 		public void LoadValue(ILGenerator il)
 		{
-			var idx = (this.Method.IsStatic) ? Index : Index + 1;
+			int idx = (Method.IsStatic) ? Index : Index + 1;
 			il.LoadArg(idx);
 		}
 
@@ -159,7 +168,7 @@ namespace FlitBit.Emit
 		/// <param name="il"></param>
 		public void StoreValue(ILGenerator il)
 		{
-			var idx = (this.Method.IsStatic) ? Index : Index + 1;
+			int idx = (Method.IsStatic) ? Index : Index + 1;
 			il.StoreArg(idx);
 		}
 

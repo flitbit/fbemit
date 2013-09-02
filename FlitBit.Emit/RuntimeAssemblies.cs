@@ -20,12 +20,12 @@ namespace FlitBit.Emit
 	/// </summary>
 	public static class RuntimeAssemblies
 	{
-		static readonly Dictionary<string, EmittedAssembly> Assemblies = new Dictionary<string, EmittedAssembly>();
+		private static readonly Dictionary<string, EmittedAssembly> Assemblies = new Dictionary<string, EmittedAssembly>();
 
-		static readonly Lazy<EmittedAssembly> LazyDynamicAssembly = new Lazy<EmittedAssembly>(() =>
+		private static readonly Lazy<EmittedAssembly> LazyDynamicAssembly = new Lazy<EmittedAssembly>(() =>
 		{
-			var now = DateTime.Now.ToString("O").Replace(':', '_');
-			var current = Assembly.GetExecutingAssembly().GetName();
+			string now = DateTime.Now.ToString("O").Replace(':', '_');
+			AssemblyName current = Assembly.GetExecutingAssembly().GetName();
 			var name = new AssemblyName(String.Concat(RuntimeAssembliesConfigSection.Current.DynamicAssemblyPrefix, now))
 			{
 				Version = current.Version,
@@ -64,18 +64,18 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
 
-			var tt = (type.IsArray) ? type.GetElementType() : type;
-			var simpleName = tt.Name;
+			Type tt = (type.IsArray) ? type.GetElementType() : type;
+			string simpleName = tt.Name;
 
 			Contract.Assume(simpleName != null);
 			Contract.Assert(simpleName.Length >= 0);
 
-			var tick = simpleName.IndexOf('`');
+			int tick = simpleName.IndexOf('`');
 			if (tick >= 0)
 			{
 				simpleName = simpleName.Substring(0, tick);
-				var args = tt.GetGenericArguments();
-				for (var i = 0; i < args.Length; i++)
+				Type[] args = tt.GetGenericArguments();
+				for (int i = 0; i < args.Length; i++)
 				{
 					simpleName = String.Concat(simpleName, i == 0 ? '<' : '`', args[i].GetEmittableFullName().Replace('.', '|'));
 				}
@@ -141,11 +141,11 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(nameFormat != null, "nameFormat cannot be null");
 			Contract.Requires<ArgumentNullException>(target != null, "target cannot be null");
 
-			var tasmName = target.GetName();
+			AssemblyName tasmName = target.GetName();
 			var asmName = new AssemblyName(String.Format(nameFormat
-																									, tasmName.Name
-																									, tasmName.Version
-																									, Assembly.GetCallingAssembly().GetName().Version).Replace('.', '_')
+				, tasmName.Name
+				, tasmName.Version
+				, Assembly.GetCallingAssembly().GetName().Version).Replace('.', '_')
 				) {Version = tasmName.Version, CultureInfo = tasmName.CultureInfo};
 			return asmName;
 		}
@@ -166,14 +166,14 @@ namespace FlitBit.Emit
 			return String.Concat(type.GetEmittableFullName(), '$', suffix);
 		}
 
-		static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
 		{
 			if (LazyDynamicAssembly.IsValueCreated)
 			{
-				var asm = LazyDynamicAssembly.Value;
+				EmittedAssembly asm = LazyDynamicAssembly.Value;
 				var reqName = new AssemblyName(args.Name);
 				if (reqName.Name.StartsWith(RuntimeAssembliesConfigSection.Current.DynamicAssemblyPrefix)
-					&& reqName.Version == asm.Name.Version)
+				    && reqName.Version == asm.Name.Version)
 				{
 					return asm.Builder;
 				}
@@ -181,13 +181,13 @@ namespace FlitBit.Emit
 			return null;
 		}
 
-		static void CurrentDomain_DomainUnload(object sender, EventArgs e)
+		private static void CurrentDomain_DomainUnload(object sender, EventArgs e)
 		{
 			try
 			{
 				if (RuntimeAssembliesConfigSection.Current.WriteAssembliesOnExit || WriteDynamicAssemblyOnExit)
 				{
-					foreach (var asm in Assemblies.Values)
+					foreach (EmittedAssembly asm in Assemblies.Values)
 					{
 						if (!asm.IsCompiled)
 						{
@@ -205,7 +205,7 @@ namespace FlitBit.Emit
 // ReSharper restore EmptyGeneralCatchClause
 		}
 
-		static Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
+		private static Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
 		{
 			// todo: reconstitue generated classes (stereotypical implementations) not already present in the dynamic assembly...
 			return null;

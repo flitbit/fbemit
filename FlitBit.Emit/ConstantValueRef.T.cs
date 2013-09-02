@@ -15,13 +15,16 @@ namespace FlitBit.Emit
 	/// <typeparam name="T"></typeparam>
 	public class ValueRef<T> : IValueRef
 	{
-		readonly T _const;
+		private readonly T _const;
 
 		/// <summary>
 		///   Creates a new instance.
 		/// </summary>
 		/// <param name="value"></param>
-		public ValueRef(T value) { _const = value; }
+		public ValueRef(T value)
+		{
+			_const = value;
+		}
 
 		#region IValueRef Members
 
@@ -38,26 +41,35 @@ namespace FlitBit.Emit
 		/// </summary>
 		public Type TargetType
 		{
-			get { return typeof(T); }
+			get { return typeof (T); }
 		}
 
 		/// <summary>
 		///   Loads the address of the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void LoadAddress(ILGenerator il) { throw new InvalidOperationException("Cannot load address of a constant"); }
+		public void LoadAddress(ILGenerator il)
+		{
+			throw new InvalidOperationException("Cannot load address of a constant");
+		}
 
 		/// <summary>
 		///   Loads the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void LoadValue(ILGenerator il) { il.LoadValue(_const); }
+		public void LoadValue(ILGenerator il)
+		{
+			il.LoadValue(_const);
+		}
 
 		/// <summary>
 		///   Stores the value.
 		/// </summary>
 		/// <param name="il"></param>
-		public void StoreValue(ILGenerator il) { throw new InvalidOperationException("Cannot store value on a constant"); }
+		public void StoreValue(ILGenerator il)
+		{
+			throw new InvalidOperationException("Cannot store value on a constant");
+		}
 
 		#endregion
 	}

@@ -24,9 +24,9 @@ namespace FlitBit.Emit
 		public static Type[] GetParameterTypes(this MethodBase method)
 		{
 			Contract.Requires<ArgumentNullException>(method != null);
-			var res =
+			Type[] res =
 				(from p in method.GetParameters()
-				select p.ParameterType).ToArray();
+					select p.ParameterType).ToArray();
 			return res;
 		}
 	}

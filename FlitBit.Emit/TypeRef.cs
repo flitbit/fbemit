@@ -19,7 +19,7 @@ namespace FlitBit.Emit
 		/// </summary>
 		public static readonly TypeRef Empty = new TypeRef();
 
-		readonly Type _type;
+		private readonly Type _type;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -35,7 +35,9 @@ namespace FlitBit.Emit
 		/// <summary>
 		///   Creates a new instance.
 		/// </summary>
-		protected TypeRef() { }
+		protected TypeRef()
+		{
+		}
 
 		/// <summary>
 		///   Gets the reference target.
@@ -50,21 +52,30 @@ namespace FlitBit.Emit
 		/// </summary>
 		/// <param name="class">the emitted type</param>
 		/// <returns>a type ref</returns>
-		public static TypeRef FromEmittedClass(EmittedClass @class) { return new EmittedTypeRef(@class); }
+		public static TypeRef FromEmittedClass(EmittedClass @class)
+		{
+			return new EmittedTypeRef(@class);
+		}
 
 		/// <summary>
 		///   Creates a type ref from type T
 		/// </summary>
 		/// <typeparam name="T">type T</typeparam>
 		/// <returns>a type ref</returns>
-		public static TypeRef FromType<T>() { return new TypeRef(typeof(T)); }
+		public static TypeRef FromType<T>()
+		{
+			return new TypeRef(typeof (T));
+		}
 
 		/// <summary>
 		///   Creates a type ref from a type.
 		/// </summary>
 		/// <param name="type">the type</param>
 		/// <returns>the type ref</returns>
-		public static TypeRef FromType(Type type) { return new TypeRef(type); }
+		public static TypeRef FromType(Type type)
+		{
+			return new TypeRef(type);
+		}
 	}
 
 	/// <summary>
@@ -72,7 +83,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedTypeRef : TypeRef
 	{
-		readonly EmittedClass _eclass;
+		private readonly EmittedClass _eclass;
 
 		/// <summary>
 		///   Creates a new instance.

@@ -24,8 +24,8 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
-			this.TargetClass = type;
-			this.Name = name;
+			TargetClass = type;
+			Name = name;
 		}
 
 		/// <summary>
@@ -53,16 +53,19 @@ namespace FlitBit.Emit
 		/// </summary>
 		public void Compile()
 		{
-			if (!this.IsCompiled)
+			if (!IsCompiled)
 			{
 				OnCompile();
-				this.IsCompiled = true;
+				IsCompiled = true;
 			}
 		}
 
 		/// <summary>
 		///   Called by the framework when the member is being compiled.
 		/// </summary>
-		protected internal virtual void OnCompile() { throw new NotImplementedException(); }
+		protected internal virtual void OnCompile()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

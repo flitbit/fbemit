@@ -18,12 +18,12 @@ namespace FlitBit.Emit
 	/// </summary>
 	public abstract class EmittedMethodBase : EmittedMember
 	{
-		readonly List<EmittedLocal> _locals = new List<EmittedLocal>();
-		readonly List<EmittedParameter> _parameters = new List<EmittedParameter>();
-		MethodAttributes _attributes;
-		CallingConventions _callingConvention;
-		List<Action<EmittedMethodBase, ILGenerator>> _gen;
-		ILGenerator _generatorDuringCompile;
+		private readonly List<EmittedLocal> _locals = new List<EmittedLocal>();
+		private readonly List<EmittedParameter> _parameters = new List<EmittedParameter>();
+		private MethodAttributes _attributes;
+		private CallingConventions _callingConvention;
+		private List<Action<EmittedMethodBase, ILGenerator>> _gen;
+		private ILGenerator _generatorDuringCompile;
 
 		/// <summary>
 		///   Creates a new instance
@@ -31,7 +31,9 @@ namespace FlitBit.Emit
 		/// <param name="type">the emitted type, owner</param>
 		/// <param name="name">the method's name</param>
 		protected EmittedMethodBase(EmittedClass type, string name)
-			: base(type, name) { }
+			: base(type, name)
+		{
+		}
 
 		/// <summary>
 		///   Gets the method's parameter types.
@@ -41,7 +43,7 @@ namespace FlitBit.Emit
 			get
 			{
 				return (from prop in _parameters
-								select prop.ParameterType.Target).ToArray<Type>();
+					select prop.ParameterType.Target).ToArray<Type>();
 			}
 		}
 
@@ -56,7 +58,7 @@ namespace FlitBit.Emit
 				Contract.Assert(!HasBuilder, "Attributes must be set before the Builder is created or accessed");
 
 				_attributes = value;
-				this.IsStatic = value.HasFlag(MethodAttributes.Static);
+				IsStatic = value.HasFlag(MethodAttributes.Static);
 			}
 		}
 
@@ -126,7 +128,10 @@ namespace FlitBit.Emit
 		/// <param name="name">the local's name</param>
 		/// <param name="type">the local's type</param>
 		/// <returns>the emitted local</returns>
-		public EmittedLocal DefineLocal(string name, Type type) { return DefineLocal(name, new TypeRef(type)); }
+		public EmittedLocal DefineLocal(string name, Type type)
+		{
+			return DefineLocal(name, new TypeRef(type));
+		}
 
 		/// <summary>
 		///   Defines a local variable.
@@ -140,12 +145,12 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
 
 			if ((from l in _locals
-					where String.Equals(name, l.Name)
-					select l).SingleOrDefault() != null)
+				where String.Equals(name, l.Name)
+				select l).SingleOrDefault() != null)
 			{
 				throw new InvalidOperationException(String.Format(
-																												 @"Method already contains a local by the same name: name = {0} unfinished method = {1}",
-																												name, this.UnfinishedSignature()));
+					@"Method already contains a local by the same name: name = {0} unfinished method = {1}",
+					name, UnfinishedSignature()));
 			}
 
 			EmittedLocal result;
@@ -171,9 +176,9 @@ namespace FlitBit.Emit
 			if (_parameters.Any(p => String.Equals(name, p.Name)))
 			{
 				throw new InvalidOperationException(String.Format(
-																												 @"Method already contains a parameter by the same name:
+					@"Method already contains a parameter by the same name:
 			name = {0}
-			unfinished method = {1}", name, this.UnfinishedSignature()));
+			unfinished method = {1}", name, UnfinishedSignature()));
 			}
 
 			var result = new EmittedParameter(this, _parameters.Count, name, typeRef);
@@ -206,11 +211,11 @@ namespace FlitBit.Emit
 			Attributes &= (~attr);
 			if (Attributes.HasFlag(MethodAttributes.Static))
 			{
-				this.CallingConvention &= (~CallingConventions.HasThis);
+				CallingConvention &= (~CallingConventions.HasThis);
 			}
 			else
 			{
-				this.CallingConvention |= CallingConventions.HasThis;
+				CallingConvention |= CallingConventions.HasThis;
 			}
 		}
 
@@ -224,11 +229,11 @@ namespace FlitBit.Emit
 			Attributes |= attr;
 			if (Attributes.HasFlag(MethodAttributes.Static))
 			{
-				this.CallingConvention &= (~CallingConventions.HasThis);
+				CallingConvention &= (~CallingConventions.HasThis);
 			}
 			else
 			{
-				this.CallingConvention |= CallingConventions.HasThis;
+				CallingConvention |= CallingConventions.HasThis;
 			}
 		}
 
@@ -251,7 +256,10 @@ namespace FlitBit.Emit
 		///   Adds a parameter introduced by subclasses.
 		/// </summary>
 		/// <param name="parameter">the parameter</param>
-		protected void AddParameter(EmittedParameter parameter) { _parameters.Add(parameter); }
+		protected void AddParameter(EmittedParameter parameter)
+		{
+			_parameters.Add(parameter);
+		}
 
 		/// <summary>
 		///   Compiles the method's locals.
@@ -259,7 +267,7 @@ namespace FlitBit.Emit
 		/// <param name="il">IL</param>
 		protected void CompileLocals(ILGenerator il)
 		{
-			foreach (var l in _locals)
+			foreach (EmittedLocal l in _locals)
 			{
 				l.Compile(il);
 			}
@@ -271,7 +279,7 @@ namespace FlitBit.Emit
 		/// <param name="m">the method</param>
 		protected void CompileParameters(MethodBuilder m)
 		{
-			foreach (var p in _parameters)
+			foreach (EmittedParameter p in _parameters)
 			{
 				p.Compile(m);
 			}
@@ -283,7 +291,7 @@ namespace FlitBit.Emit
 		/// <param name="c">the construtor builder</param>
 		protected void CompileParameters(ConstructorBuilder c)
 		{
-			foreach (var p in _parameters)
+			foreach (EmittedParameter p in _parameters)
 			{
 				p.Compile(c);
 			}
@@ -296,12 +304,15 @@ namespace FlitBit.Emit
 		/// </summary>
 		/// <param name="il">IL</param>
 		/// <returns>the given IL</returns>
-		protected ILGenerator SetILGenerator(ILGenerator il) { return _generatorDuringCompile = il; }
+		protected ILGenerator SetILGenerator(ILGenerator il)
+		{
+			return _generatorDuringCompile = il;
+		}
 
-		string UnfinishedSignature()
+		private string UnfinishedSignature()
 		{
 			// TODO: Output the parameters as they are defined at the time of the call.
-			return String.Concat(this.TargetClass.Builder.FullName, '.', this.Name, "(...)");
+			return String.Concat(TargetClass.Builder.FullName, '.', Name, "(...)");
 		}
 	}
 }

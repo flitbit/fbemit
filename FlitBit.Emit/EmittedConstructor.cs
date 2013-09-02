@@ -15,7 +15,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedConstructor : EmittedMethodBase
 	{
-		ConstructorBuilder _builder;
+		private ConstructorBuilder _builder;
 
 		/// <summary>
 		///   Creates a new instance
@@ -25,9 +25,9 @@ namespace FlitBit.Emit
 		public EmittedConstructor(EmittedClass type, string name)
 			: base(type, name)
 		{
-			this.IncludeAttributes(MethodAttributes.RTSpecialName | MethodAttributes.SpecialName | MethodAttributes.HideBySig |
-				MethodAttributes.Public);
-			this.CallingConvention = CallingConventions.Standard;
+			IncludeAttributes(MethodAttributes.RTSpecialName | MethodAttributes.SpecialName | MethodAttributes.HideBySig |
+			                  MethodAttributes.Public);
+			CallingConvention = CallingConventions.Standard;
 		}
 
 		/// <summary>
@@ -37,9 +37,9 @@ namespace FlitBit.Emit
 		{
 			get
 			{
-				return this._builder ?? (this._builder = this.TargetClass.Builder.DefineConstructor(this.Attributes,
-																																														this.CallingConvention,
-																																														this.ParameterTypes
+				return _builder ?? (_builder = TargetClass.Builder.DefineConstructor(Attributes,
+					CallingConvention,
+					ParameterTypes
 					));
 			}
 		}
@@ -49,7 +49,7 @@ namespace FlitBit.Emit
 		/// </summary>
 		protected override bool HasBuilder
 		{
-			get { return this._builder != null; }
+			get { return _builder != null; }
 		}
 
 		/// <summary>
@@ -70,12 +70,12 @@ namespace FlitBit.Emit
 		/// </summary>
 		protected internal override void OnCompile()
 		{
-			var cls = TargetClass;
-			var il = SetILGenerator(Builder.GetILGenerator());
+			EmittedClass cls = TargetClass;
+			ILGenerator il = SetILGenerator(Builder.GetILGenerator());
 			try
 			{
 				CompileParameters(Builder);
-				foreach (var f in cls.Fields.Where(f => f.IsStatic == IsStatic))
+				foreach (EmittedField f in cls.Fields.Where(f => f.IsStatic == IsStatic))
 				{
 					f.EmitInit(this, il);
 				}

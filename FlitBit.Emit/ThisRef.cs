@@ -6,29 +6,29 @@ using FlitBit.Core;
 namespace FlitBit.Emit
 {
 	/// <summary>
-	/// Value reference for the current object (this).
+	///   Value reference for the current object (this).
 	/// </summary>
 	public sealed class ThisRef : IValueRef
 	{
 		/// <summary>
-		/// Creates a new instance.
+		///   Creates a new instance.
 		/// </summary>
 		/// <param name="cls"></param>
 		public ThisRef(EmittedClass cls)
-			:this(cls.Builder)
+			: this(cls.Builder)
 		{
 			Contract.Requires<ArgumentNullException>(cls != null);
 		}
 
 		/// <summary>
-		/// Creates a new instance.
+		///   Creates a new instance.
 		/// </summary>
 		/// <param name="type"></param>
 		public ThisRef(Type type)
 		{
 			Contract.Requires<ArgumentNullException>(type != null);
-			this.Name = type.GetReadableSimpleName();
-			this.TargetType = type;
+			Name = type.GetReadableSimpleName();
+			TargetType = type;
 		}
 
 		/// <summary>

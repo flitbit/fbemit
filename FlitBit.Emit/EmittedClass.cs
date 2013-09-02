@@ -30,24 +30,27 @@ namespace FlitBit.Emit
 		/// </summary>
 		public static readonly TypeAttributes StaticTypeAttributes = TypeAttributes.Sealed | TypeAttributes.Abstract;
 
-		readonly IList<CustomAttributeDescriptor> _customAttr = new List<CustomAttributeDescriptor>();
-		readonly Dictionary<string, EmittedField> _fields = new Dictionary<string, EmittedField>();
+		private readonly IList<CustomAttributeDescriptor> _customAttr = new List<CustomAttributeDescriptor>();
+		private readonly Dictionary<string, EmittedField> _fields = new Dictionary<string, EmittedField>();
 
-		readonly Dictionary<string, EmittedGenericArgument> _genericArguments =
+		private readonly Dictionary<string, EmittedGenericArgument> _genericArguments =
 			new Dictionary<string, EmittedGenericArgument>();
 
-		readonly List<TypeRef> _implementedInterfaces = new List<TypeRef>();
-		readonly Dictionary<string, List<EmittedMember>> _members = new Dictionary<string, List<EmittedMember>>();
-		readonly Dictionary<string, List<EmittedMethodBase>> _methods = new Dictionary<string, List<EmittedMethodBase>>();
-		readonly ModuleBuilder _module;
-		readonly string _name;
-		readonly EmittedClass _nestParent;
-		readonly Dictionary<string, EmittedProperty> _properties = new Dictionary<string, EmittedProperty>();
-		readonly Type _supertype;
-		readonly Dictionary<string, EmittedClass> _types = new Dictionary<string, EmittedClass>();
-		TypeAttributes _attributes;
-		TypeBuilder _builder;
-		TypeRef _ref;
+		private readonly List<TypeRef> _implementedInterfaces = new List<TypeRef>();
+		private readonly Dictionary<string, List<EmittedMember>> _members = new Dictionary<string, List<EmittedMember>>();
+
+		private readonly Dictionary<string, List<EmittedMethodBase>> _methods =
+			new Dictionary<string, List<EmittedMethodBase>>();
+
+		private readonly ModuleBuilder _module;
+		private readonly string _name;
+		private readonly EmittedClass _nestParent;
+		private readonly Dictionary<string, EmittedProperty> _properties = new Dictionary<string, EmittedProperty>();
+		private readonly Type _supertype;
+		private readonly Dictionary<string, EmittedClass> _types = new Dictionary<string, EmittedClass>();
+		private TypeAttributes _attributes;
+		private TypeBuilder _builder;
+		private TypeRef _ref;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -98,7 +101,7 @@ namespace FlitBit.Emit
 			_implementedInterfaces = (interfaces == null)
 				? new List<TypeRef>()
 				: new List<TypeRef>(from i in interfaces
-														select new TypeRef(i));
+					select new TypeRef(i));
 
 			_attributes = attributes;
 			_ref = new EmittedTypeRef(this);
@@ -128,7 +131,7 @@ namespace FlitBit.Emit
 			_implementedInterfaces = (interfaces == null)
 				? new List<TypeRef>()
 				: new List<TypeRef>(from i in interfaces
-														select new TypeRef(i));
+					select new TypeRef(i));
 
 			_attributes = attributes;
 			_members = new Dictionary<string, List<EmittedMember>>();
@@ -164,25 +167,25 @@ namespace FlitBit.Emit
 				{
 					if (_module != null)
 					{
-						_builder = _module.DefineType(_name, _attributes, _supertype ?? typeof(Object)
-																					, (from i in _implementedInterfaces
-																						select i.Target).ToArray()
+						_builder = _module.DefineType(_name, _attributes, _supertype ?? typeof (Object)
+							, (from i in _implementedInterfaces
+								select i.Target).ToArray()
 							);
 					}
 					else
 					{
 						_nestParent.Compile();
-						_builder = _nestParent.Builder.DefineNestedType(_name, _attributes, _supertype ?? typeof(Object)
-																														, (from i in _implementedInterfaces
-																															select i.Target).ToArray()
+						_builder = _nestParent.Builder.DefineNestedType(_name, _attributes, _supertype ?? typeof (Object)
+							, (from i in _implementedInterfaces
+								select i.Target).ToArray()
 							);
 					}
 					if (_genericArguments.Count > 0)
 					{
-						foreach (var arg in this.Builder.DefineGenericParameters(
-																																		 (from a in _genericArguments.Values
-																																			orderby a.Position
-																																			select a.Name).ToArray()
+						foreach (GenericTypeParameterBuilder arg in Builder.DefineGenericParameters(
+							(from a in _genericArguments.Values
+								orderby a.Position
+								select a.Name).ToArray()
 							))
 						{
 							_genericArguments[arg.Name].FinishDefinition(arg);
@@ -237,7 +240,7 @@ namespace FlitBit.Emit
 			var result = new EmittedConstructor(this, "cctor");
 			result.ExcludeAttributes(MethodAttributes.Public);
 			result.IncludeAttributes(MethodAttributes.Private | MethodAttributes.Static);
-			this.AddMethod(result);
+			AddMethod(result);
 			return result;
 		}
 
@@ -248,7 +251,7 @@ namespace FlitBit.Emit
 		public EmittedConstructor DefineCtor()
 		{
 			var result = new EmittedConstructor(this, "ctor");
-			this.AddMethod(result);
+			AddMethod(result);
 			return result;
 		}
 
@@ -259,14 +262,15 @@ namespace FlitBit.Emit
 		public EmittedConstructor DefineDefaultCtor()
 		{
 			var result = new EmittedConstructor(this, "ctor");
-			this.AddMethod(result);
+			AddMethod(result);
 			result.ContributeInstructions((m, il) =>
 			{
 				if (_supertype != null)
 				{
-					var superCtor = _supertype.GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
-																										, null, Type.EmptyTypes, null
-						);
+					ConstructorInfo superCtor =
+						_supertype.GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
+							, null, Type.EmptyTypes, null
+							);
 					if (superCtor != null && !superCtor.IsPrivate)
 					{
 						il.LoadArg_0();
@@ -320,7 +324,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(fieldType != null);
 
 			var fld = new EmittedField(this, fieldName, fieldType);
-			this.AddField(fld);
+			AddField(fld);
 			return fld;
 		}
 
@@ -333,7 +337,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(generic != null);
 			Contract.Assert(_builder == null, "generic arguments must be defined before the Builder is accessed");
 
-			foreach (var a in generic.GetGenericArguments())
+			foreach (Type a in generic.GetGenericArguments())
 			{
 				var arg = new EmittedGenericArgument
 				{
@@ -342,7 +346,7 @@ namespace FlitBit.Emit
 					Attributes = a.GenericParameterAttributes
 				};
 				AddGenericArgument(arg);
-				foreach (var c in a.GetGenericParameterConstraints())
+				foreach (Type c in a.GetGenericParameterConstraints())
 				{
 					if (c.IsInterface)
 					{
@@ -366,7 +370,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(methodName != null);
 
 			var method = new EmittedMethod(this, methodName);
-			this.AddMethod(method);
+			AddMethod(method);
 			return method;
 		}
 
@@ -380,7 +384,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(method != null);
 
 			var result = new EmittedMethod(this, method, false);
-			this.AddMethod(result);
+			AddMethod(result);
 			return result;
 		}
 
@@ -388,7 +392,10 @@ namespace FlitBit.Emit
 		///   Defines a nested type.
 		/// </summary>
 		/// <returns>the nested emitted type</returns>
-		public EmittedClass DefineNestedType() { throw new NotImplementedException(); }
+		public EmittedClass DefineNestedType()
+		{
+			throw new NotImplementedException();
+		}
 
 		/// <summary>
 		///   Defines a method that overrides another method.
@@ -400,7 +407,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(method != null);
 
 			var result = new EmittedMethod(this, method, true);
-			this.AddMethod(result);
+			AddMethod(result);
 			return result;
 		}
 
@@ -410,7 +417,10 @@ namespace FlitBit.Emit
 		/// <typeparam name="T">type T</typeparam>
 		/// <param name="propertyName">the property's name</param>
 		/// <returns>the emitted property</returns>
-		public EmittedProperty DefineProperty<T>(string propertyName) { return DefineProperty(propertyName, typeof(T)); }
+		public EmittedProperty DefineProperty<T>(string propertyName)
+		{
+			return DefineProperty(propertyName, typeof (T));
+		}
 
 		/// <summary>
 		///   Defines a property
@@ -425,7 +435,7 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(propertyType != null);
 
 			var prop = new EmittedProperty(this, propertyName, new TypeRef(propertyType), false);
-			this.AddProperty(prop);
+			AddProperty(prop);
 			return prop;
 		}
 
@@ -437,16 +447,16 @@ namespace FlitBit.Emit
 		public EmittedProperty DefinePropertyFromPropertyInfo(PropertyInfo property)
 		{
 			Contract.Requires<ArgumentNullException>(property != null, "property cannot be null");
-			var @params = property.GetIndexParameters().Select(parameter => parameter.ParameterType).ToArray();
-			var isStatic = (property.CanRead && property.GetGetMethod().IsStatic) ||
-				(property.CanWrite && property.GetSetMethod().IsStatic);
+			Type[] @params = property.GetIndexParameters().Select(parameter => parameter.ParameterType).ToArray();
+			bool isStatic = (property.CanRead && property.GetGetMethod().IsStatic) ||
+			                (property.CanWrite && property.GetSetMethod().IsStatic);
 			var prop = new EmittedProperty(this,
-																		property.Name,
-																		new TypeRef(property.PropertyType),
-																		@params,
-																		isStatic
+				property.Name,
+				new TypeRef(property.PropertyType),
+				@params,
+				isStatic
 				);
-			this.AddProperty(prop);
+			AddProperty(prop);
 			return prop;
 		}
 
@@ -460,7 +470,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(propertyName != null);
 			Contract.Requires<ArgumentNullException>(propertyName.Length > 0);
-			return DefinePropertyWithBackingField(propertyName, typeof(T));
+			return DefinePropertyWithBackingField(propertyName, typeof (T));
 		}
 
 		/// <summary>
@@ -477,7 +487,7 @@ namespace FlitBit.Emit
 
 			var prop = new EmittedProperty(this, propertyName, new TypeRef(propertyType), false);
 			prop.BindField(DefineField(String.Concat("<", propertyName, ">_field"), propertyType));
-			this.AddProperty(prop);
+			AddProperty(prop);
 			return prop;
 		}
 
@@ -505,7 +515,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(constructor != null);
 
-			this.SetCustomAttribute(constructor, new object[0]);
+			SetCustomAttribute(constructor, new object[0]);
 		}
 
 		/// <summary>
@@ -514,8 +524,8 @@ namespace FlitBit.Emit
 		public void SetCustomAttribute<T>()
 			where T : Attribute
 		{
-			var ctor = typeof(T).GetConstructor(Type.EmptyTypes);
-			this.SetCustomAttribute(ctor, new object[0]);
+			ConstructorInfo ctor = typeof (T).GetConstructor(Type.EmptyTypes);
+			SetCustomAttribute(ctor, new object[0]);
 		}
 
 		/// <summary>
@@ -527,11 +537,11 @@ namespace FlitBit.Emit
 		public void StubMethodsForInterface(Type intf, bool skipGetters, bool skipSetters)
 		{
 			Contract.Requires<ArgumentNullException>(intf != null);
-			foreach (var m in intf.GetMethods())
+			foreach (MethodInfo m in intf.GetMethods())
 			{
 				if (skipGetters && m.Name.StartsWith("get_"))
 				{
-					var p = intf.GetProperty(m.Name.Substring(4));
+					PropertyInfo p = intf.GetProperty(m.Name.Substring(4));
 					if (p != null && p.GetGetMethod() == m)
 					{
 						continue;
@@ -540,20 +550,20 @@ namespace FlitBit.Emit
 
 				if (skipSetters && m.Name.StartsWith("set_"))
 				{
-					var p = intf.GetProperty(m.Name.Substring(4));
+					PropertyInfo p = intf.GetProperty(m.Name.Substring(4));
 					if (p != null && p.GetSetMethod() == m)
 					{
 						continue;
 					}
 				}
 
-				if (this._supertype != null && this._supertype.GetMethod(m.Name, m.GetParameterTypes()) == null)
+				if (_supertype != null && _supertype.GetMethod(m.Name, m.GetParameterTypes()) == null)
 				{
 					DefineOverrideMethod(m).ContributeInstructions((mb, il) =>
 					{
 						il.Nop();
-						il.NewObj(typeof(NotImplementedException).GetConstructor(Type.EmptyTypes));
-						il.Throw(typeof(NotImplementedException));
+						il.NewObj(typeof (NotImplementedException).GetConstructor(Type.EmptyTypes));
+						il.Throw(typeof (NotImplementedException));
 					});
 				}
 			}
@@ -579,9 +589,9 @@ namespace FlitBit.Emit
 			List<EmittedMethodBase> methods;
 			if (_methods.TryGetValue(".ctor", out methods))
 			{
-				var mm = (from m in methods
-									where m.ParameterTypes.EqualsOrItemsEqual(args)
-									select m).SingleOrDefault();
+				EmittedMethodBase mm = (from m in methods
+					where m.ParameterTypes.EqualsOrItemsEqual(args)
+					select m).SingleOrDefault();
 				if (mm != null)
 				{
 					var constructor = mm as EmittedConstructor;
@@ -603,9 +613,9 @@ namespace FlitBit.Emit
 			List<EmittedMethodBase> methods;
 			if (_methods.TryGetValue(name, out methods))
 			{
-				var mm = (from m in methods
-									where m.ParameterTypes.EqualsOrItemsEqual(args)
-									select m).SingleOrDefault();
+				EmittedMethodBase mm = (from m in methods
+					where m.ParameterTypes.EqualsOrItemsEqual(args)
+					select m).SingleOrDefault();
 				if (mm != null)
 				{
 					var method = mm as EmittedMethod;
@@ -618,7 +628,7 @@ namespace FlitBit.Emit
 			return null;
 		}
 
-		void AddField(EmittedField field)
+		private void AddField(EmittedField field)
 		{
 			Contract.Requires<ArgumentNullException>(field != null);
 			Contract.Requires<ArgumentNullException>(field.Name != null);
@@ -626,10 +636,10 @@ namespace FlitBit.Emit
 
 			CheckMemberName(field.Name);
 			_fields.Add(field.Name, field);
-			this.AddMember(field);
+			AddMember(field);
 		}
 
-		void AddGenericArgument(EmittedGenericArgument arg)
+		private void AddGenericArgument(EmittedGenericArgument arg)
 		{
 			Contract.Assert(arg != null);
 			Contract.Assert(_genericArguments != null);
@@ -637,7 +647,7 @@ namespace FlitBit.Emit
 			_genericArguments.Add(arg.Name, arg);
 		}
 
-		void AddMember(EmittedMember m)
+		private void AddMember(EmittedMember m)
 		{
 			Contract.Requires<ArgumentNullException>(m != null);
 
@@ -654,7 +664,7 @@ namespace FlitBit.Emit
 			}
 		}
 
-		void AddMethod(EmittedMethodBase method)
+		private void AddMethod(EmittedMethodBase method)
 		{
 			Contract.Requires<ArgumentNullException>(method != null);
 
@@ -669,19 +679,19 @@ namespace FlitBit.Emit
 				_methods.Add(method.Name, methods);
 				methods.Add(method);
 			}
-			this.AddMember(method);
+			AddMember(method);
 		}
 
-		void AddProperty(EmittedProperty prop)
+		private void AddProperty(EmittedProperty prop)
 		{
 			Contract.Requires<ArgumentNullException>(prop != null);
 
 			CheckMemberName(prop.Name);
 			_properties.Add(prop.Name, prop);
-			this.AddMember(prop);
+			AddMember(prop);
 		}
 
-		void CheckMemberName(string name)
+		private void CheckMemberName(string name)
 		{
 			Contract.Requires<ArgumentNullException>(name != null);
 			Contract.Requires<ArgumentNullException>(name.Length > 0);
@@ -689,52 +699,55 @@ namespace FlitBit.Emit
 			if (_members.ContainsKey(name))
 			{
 				throw new InvalidOperationException(String.Format(
-																												 @"Type already contains a member by the same name: member name = {0} type = {1}", name,
-																												this.Name));
+					@"Type already contains a member by the same name: member name = {0} type = {1}", name,
+					Name));
 			}
 		}
 
 		/// <summary>
-		/// Specializes the base class' GetHashCode method.
+		///   Specializes the base class' GetHashCode method.
 		/// </summary>
 		/// <param name="hashCodeSeed">a value reference to a hash code seed value.</param>
 		/// <param name="filtered">function that filters the class' fields from inclusion in the hashcode</param>
 		/// <param name="specialize">function that specializes the hashcode algorithm for a particular field</param>
 		/// <returns>the emitted, specialized GetHashCode method</returns>
-		/// <exception cref="ArgumentNullException">thrown if <paramref name="hashCodeSeed"/> is null.</exception>
-		/// <exception cref="InvalidOperationException">thrown if a field member cannot be included in the hashcode; these should be handled by the provided <paramref name="specialize"/> method.</exception>
+		/// <exception cref="ArgumentNullException">thrown if <paramref name="hashCodeSeed" /> is null.</exception>
+		/// <exception cref="InvalidOperationException">
+		///   thrown if a field member cannot be included in the hashcode; these should
+		///   be handled by the provided <paramref name="specialize" /> method.
+		/// </exception>
 		public EmittedMethod SpecializeGetHashCode(IValueRef hashCodeSeed,
-				Func<EmittedField, bool> filtered,
-				Func<EmittedClass, EmittedField, int, LocalBuilder, ILGenerator, bool> specialize)
+			Func<EmittedField, bool> filtered,
+			Func<EmittedClass, EmittedField, int, LocalBuilder, ILGenerator, bool> specialize)
 		{
 			Contract.Requires<ArgumentNullException>(hashCodeSeed != null);
 
-			var method = this.DefineMethod("GetHashCode");
+			EmittedMethod method = DefineMethod("GetHashCode");
 			method.ClearAttributes();
 			method.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
 			method.ReturnType = TypeRef.FromType<int>();
 			method.ContributeInstructions((m, il) =>
 			{
-				var result = il.DeclareLocal(typeof(Int32));
-				il.DeclareLocal(typeof(Int32));
-				il.DeclareLocal(typeof(bool));
+				LocalBuilder result = il.DeclareLocal(typeof (Int32));
+				il.DeclareLocal(typeof (Int32));
+				il.DeclareLocal(typeof (bool));
 				il.Nop();
 				il.LoadValue(hashCodeSeed);
 				il.LoadValue(Constants.NotSoRandomPrime);
 				il.Multiply();
 				il.StoreLocal(result);
-				var exit = il.DefineLabel();
+				Label exit = il.DefineLabel();
 				var fields =
 					new List<EmittedField>(
-						this.Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
-				foreach (var field in fields)
+						Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
+				foreach (EmittedField field in fields)
 				{
 					if (specialize != null && specialize(this, field, Constants.NotSoRandomPrime, result, il))
 					{
 						continue;
 					}
-					var fieldType = field.FieldType.Target;
-					var tc = Type.GetTypeCode(fieldType);
+					Type fieldType = field.FieldType.Target;
+					TypeCode tc = Type.GetTypeCode(fieldType);
 					Label lbl;
 					switch (tc)
 					{
@@ -743,8 +756,8 @@ namespace FlitBit.Emit
 							il.LoadValue(Constants.NotSoRandomPrime);
 							il.LoadArg_0();
 							il.LoadField(field);
-							var conv = typeof(Convert).GetMethod("ToInt32", BindingFlags.Static | BindingFlags.Public, null,
-																									new[] { typeof(bool) }, null);
+							MethodInfo conv = typeof (Convert).GetMethod("ToInt32", BindingFlags.Static | BindingFlags.Public, null,
+								new[] {typeof (bool)}, null);
 							il.Call(conv);
 							il.Multiply();
 							il.Xor();
@@ -781,7 +794,7 @@ namespace FlitBit.Emit
 							il.LoadValue(Constants.NotSoRandomPrime);
 							il.LoadArg_0();
 							il.LoadFieldAddress(field);
-							il.Constrained(typeof(DateTime));
+							il.Constrained(typeof (DateTime));
 							il.CallVirtual<object>("GetHashCode");
 							il.Multiply();
 							il.Xor();
@@ -812,7 +825,7 @@ namespace FlitBit.Emit
 							il.LoadValue(Constants.NotSoRandomPrime);
 							il.LoadArg_0();
 							il.LoadFieldAddress(field);
-							il.Constrained(typeof(Int64));
+							il.Constrained(typeof (Int64));
 							il.CallVirtual<object>("GetHashCode");
 							il.Multiply();
 							il.Xor();
@@ -833,14 +846,15 @@ namespace FlitBit.Emit
 							}
 							else if (fieldType.IsArray)
 							{
-								var elmType = fieldType.GetElementType();
+								Type elmType = fieldType.GetElementType();
 								il.LoadLocal(result);
 								il.LoadValue(Constants.NotSoRandomPrime);
 								il.LoadArg_0();
 								il.LoadField(field);
 								il.LoadLocal(result);
-								il.Call(typeof(Core.Extensions).GetMethod("CalculateCombinedHashcode", BindingFlags.Public | BindingFlags.Static)
-																					.MakeGenericMethod(elmType));
+								il.Call(typeof (Core.Extensions).GetMethod("CalculateCombinedHashcode",
+									BindingFlags.Public | BindingFlags.Static)
+									.MakeGenericMethod(elmType));
 								il.Multiply();
 								il.Xor();
 								il.StoreLocal(result);
@@ -891,7 +905,7 @@ namespace FlitBit.Emit
 							il.LoadValue(Constants.NotSoRandomPrime);
 							il.LoadArg_0();
 							il.LoadFieldAddress(field);
-							il.Constrained(typeof(UInt64));
+							il.Constrained(typeof (UInt64));
 							il.CallVirtual<object>("GetHashCode");
 							il.Multiply();
 							il.Xor();
@@ -899,7 +913,7 @@ namespace FlitBit.Emit
 							break;
 						default:
 							throw new InvalidOperationException(String.Concat("Unable to produce hashcode for type: ",
-																																fieldType.GetReadableFullName()));
+								fieldType.GetReadableFullName()));
 					}
 				}
 				il.LoadLocal(result);
@@ -912,66 +926,66 @@ namespace FlitBit.Emit
 		}
 
 		/// <summary>
-		/// Specializes the base class' Equals method.
+		///   Specializes the base class' Equals method.
 		/// </summary>
 		/// <param name="equatables">the types to be implemented as IEquatable&lt;></param>
 		/// <param name="filtered">function that filters the class' fields from inclusion in equality</param>
 		/// <param name="specialize">function that specializes the equality for a particular field</param>
 		/// <returns>the emitted, specialized Equals method</returns>
 		public EmittedMethod SpecializeEquals(
-				IEnumerable<Type> equatables,
-				Func<EmittedField, bool> filtered,
-				Func<EmittedClass, EmittedField, ILGenerator, Label, bool> specialize)
+			IEnumerable<Type> equatables,
+			Func<EmittedField, bool> filtered,
+			Func<EmittedClass, EmittedField, ILGenerator, Label, bool> specialize)
 		{
-			var equatable = typeof(IEquatable<>).MakeGenericType(this.Builder);
-			this.AddInterfaceImplementation(equatable);
+			Type equatable = typeof (IEquatable<>).MakeGenericType(Builder);
+			AddInterfaceImplementation(equatable);
 
-			var specializedEquals = this.DefineMethod("Equals");
+			EmittedMethod specializedEquals = DefineMethod("Equals");
 			specializedEquals.ClearAttributes();
 			specializedEquals.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
-				MethodAttributes.Virtual | MethodAttributes.Final);
+			                                    MethodAttributes.Virtual | MethodAttributes.Final);
 			specializedEquals.ReturnType = TypeRef.FromType<bool>();
-			var other = specializedEquals.DefineParameter("other", this.Ref);
+			EmittedParameter other = specializedEquals.DefineParameter("other", Ref);
 
 			specializedEquals.ContributeInstructions((m, il) =>
 			{
-				il.DeclareLocal(typeof(bool));
-				var exitFalse = il.DefineLabel();
+				il.DeclareLocal(typeof (bool));
+				Label exitFalse = il.DefineLabel();
 				il.Nop();
 
 				var fields =
 					new List<EmittedField>(
-						this.Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
-				for (var i = 0; i < fields.Count; i++)
+						Fields.Where(f => f.IsStatic == false && (filtered == null || !filtered(f))));
+				for (int i = 0; i < fields.Count; i++)
 				{
-					var field = fields[i];
+					EmittedField field = fields[i];
 					if (specialize != null && specialize(this, field, il, exitFalse))
 					{
 						continue;
 					}
-					var fieldType = field.FieldType.Target;
+					Type fieldType = field.FieldType.Target;
 					if (fieldType.IsArray)
 					{
-						var elmType = fieldType.GetElementType();
+						Type elmType = fieldType.GetElementType();
 						LoadFieldsFromThisAndParam(il, field, other);
-						il.Call(typeof(Core.Extensions).GetMethod("EqualsOrItemsEqual", BindingFlags.Static | BindingFlags.Public)
-																			.MakeGenericMethod(elmType));
+						il.Call(typeof (Core.Extensions).GetMethod("EqualsOrItemsEqual", BindingFlags.Static | BindingFlags.Public)
+							.MakeGenericMethod(elmType));
 					}
 					else if (fieldType.IsClass)
 					{
-						if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
+						if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof (ObservableCollection<>))
 						{
 							// compare observable collections for member equality...
-							var genericArg = fieldType.GetGenericArguments()[0];
-							var etype = typeof(IEnumerable<>).MakeGenericType(genericArg);
-							var sequenceEquals = typeof(Enumerable).MatchGenericMethod("SequenceEqual",
-																																				BindingFlags.Static | BindingFlags.Public, 1, typeof(bool), etype, etype);
+							Type genericArg = fieldType.GetGenericArguments()[0];
+							Type etype = typeof (IEnumerable<>).MakeGenericType(genericArg);
+							MethodInfo sequenceEquals = typeof (Enumerable).MatchGenericMethod("SequenceEqual",
+								BindingFlags.Static | BindingFlags.Public, 1, typeof (bool), etype, etype);
 							LoadFieldsFromThisAndParam(il, field, other);
 							il.Call(sequenceEquals.MakeGenericMethod(genericArg));
 						}
 						else
 						{
-							var opEquality = fieldType.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
+							MethodInfo opEquality = fieldType.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
 							if (opEquality != null)
 							{
 								LoadFieldsFromThisAndParam(il, field, other);
@@ -979,15 +993,15 @@ namespace FlitBit.Emit
 							}
 							else
 							{
-								il.Call(typeof(EqualityComparer<>).MakeGenericType(fieldType)
-																									.GetMethod("get_Default", BindingFlags.Static | BindingFlags.Public));
+								il.Call(typeof (EqualityComparer<>).MakeGenericType(fieldType)
+									.GetMethod("get_Default", BindingFlags.Static | BindingFlags.Public));
 								LoadFieldsFromThisAndParam(il, field, other);
-								il.CallVirtual(typeof(IEqualityComparer<>).MakeGenericType(fieldType)
-																													.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance,
-																																		null,
-																																		new[] { fieldType, fieldType },
-																																		null
-																));
+								il.CallVirtual(typeof (IEqualityComparer<>).MakeGenericType(fieldType)
+									.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance,
+										null,
+										new[] {fieldType, fieldType},
+										null
+									));
 							}
 						}
 					}
@@ -1001,13 +1015,13 @@ namespace FlitBit.Emit
 						il.BranchIfFalse(exitFalse);
 					}
 				}
-				var exit = il.DefineLabel();
+				Label exit = il.DefineLabel();
 				il.Branch(exit);
 				il.MarkLabel(exitFalse);
 				il.Load_I4_0();
 				il.MarkLabel(exit);
 				il.StoreLocal_0();
-				var fin = il.DefineLabel();
+				Label fin = il.DefineLabel();
 				il.Branch(fin);
 				il.MarkLabel(fin);
 				il.LoadLocal_0();
@@ -1015,9 +1029,9 @@ namespace FlitBit.Emit
 
 			var contributedEquals = new Action<EmittedMethodBase, ILGenerator>((m, il) =>
 			{
-				var exitFalse2 = il.DefineLabel();
-				var exit = il.DefineLabel();
-				il.DeclareLocal(typeof(bool));
+				Label exitFalse2 = il.DefineLabel();
+				Label exit = il.DefineLabel();
+				il.DeclareLocal(typeof (bool));
 				il.Nop();
 				il.LoadArg_1();
 				il.IsInstance(Builder);
@@ -1031,7 +1045,7 @@ namespace FlitBit.Emit
 				il.LoadValue(false);
 				il.MarkLabel(exit);
 				il.StoreLocal_0();
-				var fin = il.DefineLabel();
+				Label fin = il.DefineLabel();
 				il.Branch(fin);
 				il.MarkLabel(fin);
 				il.LoadLocal_0();
@@ -1039,28 +1053,28 @@ namespace FlitBit.Emit
 
 			if (equatables != null)
 			{
-				foreach (var typ in equatables)
+				foreach (Type typ in equatables)
 				{
-					var equatableT = typeof(IEquatable<>).MakeGenericType(typ);
-					this.AddInterfaceImplementation(equatableT);
-					var equalsT = this.DefineMethod("Equals");
+					Type equatableT = typeof (IEquatable<>).MakeGenericType(typ);
+					AddInterfaceImplementation(equatableT);
+					EmittedMethod equalsT = DefineMethod("Equals");
 					equalsT.ClearAttributes();
 					equalsT.IncludeAttributes(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |
-						MethodAttributes.Virtual | MethodAttributes.Final);
+					                          MethodAttributes.Virtual | MethodAttributes.Final);
 					equalsT.ReturnType = TypeRef.FromType<bool>();
 					equalsT.DefineParameter("other", typ);
 					equalsT.ContributeInstructions(contributedEquals);
 				}
 			}
 
-			this.DefineOverrideMethod(typeof(Object).GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public, null,
-																														new[] { typeof(object) }, null))
-						.ContributeInstructions(contributedEquals);
+			DefineOverrideMethod(typeof (Object).GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public, null,
+				new[] {typeof (object)}, null))
+				.ContributeInstructions(contributedEquals);
 
 			return specializedEquals;
 		}
 
-		static void LoadFieldsFromThisAndParam(ILGenerator il, EmittedField field, EmittedParameter parm)
+		private static void LoadFieldsFromThisAndParam(ILGenerator il, EmittedField field, EmittedParameter parm)
 		{
 			Contract.Requires<ArgumentNullException>(il != null);
 			Contract.Requires<ArgumentNullException>(field != null);
@@ -1071,13 +1085,13 @@ namespace FlitBit.Emit
 		}
 
 		[ContractInvariantMethod]
-		void InvariantContracts()
+		private void InvariantContracts()
 		{
 			Contract.Invariant(_module != null);
 			Contract.Invariant(_fields != null);
 			Contract.Invariant(_members != null);
-			Contract.Invariant(this.Name != null);
-			Contract.Invariant(this.Name.Length > 0);
+			Contract.Invariant(Name != null);
+			Contract.Invariant(Name.Length > 0);
 		}
 
 		/// <summary>
@@ -1085,36 +1099,36 @@ namespace FlitBit.Emit
 		/// </summary>
 		protected internal override void OnCompile()
 		{
-			var builder = this.Builder;
-			foreach (var a in _customAttr)
+			TypeBuilder builder = Builder;
+			foreach (CustomAttributeDescriptor a in _customAttr)
 			{
 				builder.SetCustomAttribute(new CustomAttributeBuilder(a.Ctor, a.Args));
 			}
-			foreach (var m in _fields.Values)
+			foreach (EmittedField m in _fields.Values)
 			{
 				m.Compile();
 			}
 			foreach (var mm in _methods.Values)
 			{
 				// May be multiple methods, overloaded
-				foreach (var m in mm)
+				foreach (EmittedMethodBase m in mm)
 				{
 					m.Compile();
 				}
 			}
-			foreach (var m in _properties.Values)
+			foreach (EmittedProperty m in _properties.Values)
 			{
 				m.Compile();
 			}
-			foreach (var m in _types.Values)
+			foreach (EmittedClass m in _types.Values)
 			{
 				m.Compile();
 			}
-			var runtimeType = builder.CreateType();
+			Type runtimeType = builder.CreateType();
 			_ref = new TypeRef(runtimeType);
 		}
 
-		class CustomAttributeDescriptor
+		private class CustomAttributeDescriptor
 		{
 			internal object[] Args { get; set; }
 			internal ConstructorInfo Ctor { get; set; }

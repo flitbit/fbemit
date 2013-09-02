@@ -10,7 +10,7 @@
 		<projectUrl>http://fbemit.codeplex.com/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Added an extension method to get/match generic methods by compatability.</releaseNotes>
+		<releaseNotes>Leveled up to latest NuGets.</releaseNotes>
 		<copyright>Copyright 2013</copyright>
 	</metadata>
 </package>

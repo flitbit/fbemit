@@ -16,7 +16,7 @@ namespace FlitBit.Emit
 	/// </summary>
 	public class EmittedProperty : EmittedMember, IPropertyRef
 	{
-		PropertyBuilder _builder;
+		private PropertyBuilder _builder;
 
 		/// <summary>
 		///   Creates a new instance.
@@ -26,7 +26,9 @@ namespace FlitBit.Emit
 		/// <param name="propertyType">the property's type</param>
 		/// <param name="isStatic">whether the property is a static property</param>
 		public EmittedProperty(EmittedClass type, string name, Type propertyType, bool isStatic)
-			: this(type, name, new TypeRef(propertyType), Type.EmptyTypes, isStatic) { }
+			: this(type, name, new TypeRef(propertyType), Type.EmptyTypes, isStatic)
+		{
+		}
 
 		/// <summary>
 		///   Creates a new instance.
@@ -36,7 +38,9 @@ namespace FlitBit.Emit
 		/// <param name="propertyType">the property's type (ref)</param>
 		/// <param name="isStatic">whether the property is a static property</param>
 		public EmittedProperty(EmittedClass type, string name, TypeRef propertyType, bool isStatic)
-			: this(type, name, propertyType, Type.EmptyTypes, isStatic) { }
+			: this(type, name, propertyType, Type.EmptyTypes, isStatic)
+		{
+		}
 
 		/// <summary>
 		///   Creates a new instance.
@@ -52,9 +56,9 @@ namespace FlitBit.Emit
 			Contract.Requires<ArgumentNullException>(propertyType != null);
 			Contract.Requires<ArgumentNullException>(paramTypes != null);
 
-			this.PropertyType = propertyType;
-			this.ParameterTypes = paramTypes;
-			this.IsStatic = isStatic;
+			PropertyType = propertyType;
+			ParameterTypes = paramTypes;
+			IsStatic = isStatic;
 		}
 
 		/// <summary>
@@ -76,10 +80,10 @@ namespace FlitBit.Emit
 			{
 				if (_builder == null)
 				{
-					this._builder = this.TargetClass.Builder.DefineProperty(this.Name
-																																	, this.Attributes
-																																	, this.PropertyType.Target
-																																	, this.ParameterTypes);
+					_builder = TargetClass.Builder.DefineProperty(Name
+						, Attributes
+						, PropertyType.Target
+						, ParameterTypes);
 				}
 				return _builder;
 			}
@@ -123,14 +127,14 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(Getter == null, "Getter already assigned");
 
-			Getter = this.TargetClass.DefineMethod(String.Format("get_{0}", this.Name));
+			Getter = TargetClass.DefineMethod(String.Format("get_{0}", Name));
 			if (IsStatic)
 			{
 				Getter.IncludeAttributes(MethodAttributes.Static);
 			}
 			Getter.IncludeAttributes(MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig |
-				MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.NewSlot);
-			Getter.ReturnType = this.PropertyType;
+			                         MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.NewSlot);
+			Getter.ReturnType = PropertyType;
 			return Getter;
 		}
 
@@ -142,7 +146,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(Getter == null, "Getter already assigned");
 
-			Getter = this.TargetClass.DefineOverrideMethod(method);
+			Getter = TargetClass.DefineOverrideMethod(method);
 			return Getter;
 		}
 
@@ -154,13 +158,13 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(Setter == null, "Setter already assigned");
 
-			Setter = this.TargetClass.DefineMethod(String.Concat("set_", this.Name));
+			Setter = TargetClass.DefineMethod(String.Concat("set_", Name));
 			if (IsStatic)
 			{
 				Setter.IncludeAttributes(MethodAttributes.Static);
 			}
 			Setter.IncludeAttributes(MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig |
-				MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.NewSlot);
+			                         MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.NewSlot);
 			Setter.DefineParameter("value", PropertyType);
 			return Setter;
 		}
@@ -173,7 +177,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(Setter == null, "Setter already assigned");
 
-			Setter = this.TargetClass.DefineOverrideMethod(method);
+			Setter = TargetClass.DefineOverrideMethod(method);
 			return Setter;
 		}
 
@@ -185,7 +189,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(field != null);
 			Contract.Requires<ArgumentNullException>(field.IsStatic == IsStatic,
-																							"property scope must agree with backing field scope");
+				"property scope must agree with backing field scope");
 			Contract.Assert(BoundField == null, "cannot rebind field");
 
 			BoundField = new RawFieldRef(field);
@@ -199,7 +203,7 @@ namespace FlitBit.Emit
 		{
 			Contract.Requires<ArgumentNullException>(field != null);
 			Contract.Requires<ArgumentNullException>(field.IsStatic == IsStatic,
-																							"property scope must agree with backing field scope");
+				"property scope must agree with backing field scope");
 			Contract.Assert(BoundField == null, "cannot rebind field");
 
 			BoundField = field;
@@ -254,13 +258,19 @@ namespace FlitBit.Emit
 		///   Gets property info from the emitted property (not implemented).
 		/// </summary>
 		/// <returns>not implemented</returns>
-		public PropertyInfo GetPropertyInfo() { throw new NotImplementedException(); }
+		public PropertyInfo GetPropertyInfo()
+		{
+			throw new NotImplementedException();
+		}
 
 		/// <summary>
 		///   Loads the address of a property (not implemented).
 		/// </summary>
 		/// <param name="il">IL</param>
-		public void LoadAddress(ILGenerator il) { throw new NotImplementedException(); }
+		public void LoadAddress(ILGenerator il)
+		{
+			throw new NotImplementedException();
+		}
 
 		/// <summary>
 		///   Emits instructions to load the property's value.
