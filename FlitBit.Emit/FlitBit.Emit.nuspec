@@ -6,11 +6,11 @@
 		<title>$title$</title>
 		<authors>Phillip Clark</authors>
 		<owners>flitbit.org</owners>
-		<licenseUrl>http://fbemit.codeplex.com/license</licenseUrl>
-		<projectUrl>http://fbemit.codeplex.com/</projectUrl>
+		<licenseUrl>https://raw.github.com/flitbit-org/fbemit/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/flitbit-org/fbemit</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Leveled up to latest NuGets.</releaseNotes>
+		<releaseNotes>Moved repository home to github.</releaseNotes>
 		<copyright>Copyright 2013</copyright>
 	</metadata>
 </package>

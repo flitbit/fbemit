@@ -5,7 +5,8 @@
 	<!-- 
 		Add any project specific 'after' build stuffs...
 	-->
-
+	<Import Condition="Exists('$(BuildToolsDir)\3rdParty\nuget\nuget.targets')" Project="$(BuildToolsDir)\3rdParty\nuget\nuget.targets"/>
+	
 	<!-- 
 		Invoke the solution's wrap-around stuffs if present...
 	-->

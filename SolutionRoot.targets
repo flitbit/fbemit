@@ -8,9 +8,22 @@
 	<PropertyGroup>
 		<SolutionDir>$(MSBuildThisFileDirectory.Trim('\\'))</SolutionDir>
 	</PropertyGroup>
-
-	<Import Project="$(MSBuildExtensionsPath)\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks"/>
-	<Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
+	<PropertyGroup>
+		<BuildToolsDirOffset></BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDirOffset Condition="!Exists('$(SolutionDir)\$(BuildToolsDirOffset).build\BuildTools.targets')">..\..\..\..\..\..\..\..\..\..\..\</BuildToolsDirOffset>
+		<BuildToolsDir>$(SolutionDir)\$(BuildToolsDirOffset)</BuildToolsDir>
+	</PropertyGroup>
+	
+	<Import Project="$(BuildToolsDir).build\BuildTools.targets"/>
 
 	<Import Condition="Exists('$(SolutionDir)\VersionRoot.targets')"
 		Project="$(SolutionDir)\VersionRoot.targets" />
