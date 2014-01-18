@@ -58,7 +58,7 @@ GOTO:EXIT
 SET F="%~1"
 ECHO.%~p1
 ECHO. %~1
-SET "CL=msbuild %F% /p:Configuration=%CFG%;Platform=%PLT% /t:Clean;Build /v:%VRB% > build_%UNIQUE%.log"
+SET "CL=msbuild %F% /p:Configuration=%CFG%;Platform=%PLT% /t:Build /v:%VRB% > build_%UNIQUE%.log"
 %CL%
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO.Build failed...
