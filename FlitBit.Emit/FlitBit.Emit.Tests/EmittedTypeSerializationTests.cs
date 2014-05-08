@@ -86,6 +86,8 @@ namespace FlitBit.Emit.Tests
 		ushort UInt16 { get; set; }
 		uint UInt32 { get; set; }
 		ulong UInt64 { get; set; }
+
+    string IntAsString { get; }
 	}
 
 	[TestClass]
@@ -141,7 +143,7 @@ namespace FlitBit.Emit.Tests
 				it.NullableUInt16 = gen.GetBoolean() ? gen.GetUInt16() : (ushort?) null;
 				it.NullableUInt32 = gen.GetBoolean() ? gen.GetUInt32() : (uint?) null;
 				it.NullableUInt64 = gen.GetBoolean() ? gen.GetUInt64() : (ulong?) null;
-
+        
 				using (var serialized = SerializeToStream(it))
 				{
 					var deserialized = DeserializeFromStream<ITestSamplingOfTypes>(serialized);
@@ -226,7 +228,7 @@ namespace FlitBit.Emit.Tests
 				var properties = intf.GetProperties();
 				foreach (var p in properties)
 				{
-					var property = p;
+          var property = p;
 					builder.DefinePropertyWithBackingField(property.Name, property.PropertyType);
 				}
 				builder.StubMethodsForInterface(intf, true, true);

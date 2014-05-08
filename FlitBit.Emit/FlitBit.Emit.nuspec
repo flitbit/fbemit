@@ -10,7 +10,7 @@
 		<projectUrl>https://github.com/flitbit-org/fbemit</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Moved repository home to github.</releaseNotes>
-		<copyright>Copyright 2013</copyright>
+		<releaseNotes>Updated dependency to Core 3.2.</releaseNotes>
+		<copyright>COPYRIGHT© 2009-2014 Phillip Clark. All rights reserved.</copyright>
 	</metadata>
 </package>

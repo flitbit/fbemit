@@ -4,8 +4,8 @@
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <VersionMajor>2</VersionMajor>
-    <VersionMinor>9</VersionMinor>
+    <VersionMajor>3</VersionMajor>
+    <VersionMinor>0</VersionMinor>
     <VersionBuild>0</VersionBuild>
   </PropertyGroup>
 </Project>
